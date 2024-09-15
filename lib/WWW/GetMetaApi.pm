@@ -12,6 +12,7 @@ use LWP::UserAgent;
 use HTTP::CookieJar::LWP ();
 use File::Slurp;
 use File::Share ':all';
+use HTML::Entities;
 use FindBin::libs "Bin=${FindBin::RealBin}";
 use open ':std' => ':utf8';
 
@@ -115,7 +116,8 @@ sub getMetaFromContent {
     while (
         $head =~ /<meta\s+(name|property)="(?<name>[^"]+)"\s+content="(?<content>[^"]+)"\s*\/?>/g )
     {
-        $meta->{ trim( $+{'name'} ) } = trim( $+{'content'} ) || '';
+        $meta->{ trim( decode_entities( $+{'name'} ) ) }
+            = trim( decode_entities( $+{'content'} ) ) || '';
     }
     $meta->{'_title'}
         = removeAgitations( $meta->{'twitter:title'}
@@ -134,7 +136,7 @@ sub getMetaFromContent {
 sub getTitle {
     my $text = shift or return;
     $text =~ /<title>(?<title>[\S\s]+?)<\/title>/;
-    return trim( $+{'title'} ) || '';
+    return trim( decode_entities( $+{'title'} ) ) || '';
 }
 
 sub removeAgitations {
