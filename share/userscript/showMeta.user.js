@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-13_19:03
+// @version      2024-09-16_04:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -18,12 +18,7 @@
   'use strict';
   const heightThumbnail = 96;
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
-  const supportedHosts = [
-    'bookwalker.jp', 'www.bookwalker.jp', 'r18.bookwalker.jp', 'help.bookwalker.jp',
-  ];
-  const xpathContentLinks = './/a[('
-    + supportedHosts.map(host => 'contains(@href, "//' + host + '/")').join(' or ')
-    + ') and not(@data-informed) and not(@data-index)]';
+  const xpathContentLinks = './/a[(starts-with(@href, "http")) and not(@data-informed) and not(@data-index)]';
   const history = {};
   let index = 0;
   await sleep(3000);

@@ -26,7 +26,7 @@ my $dirDist = dist_dir('WWW-GetMetaApi');
 my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
 my $jar     = HTTP::CookieJar::LWP->new->load_cookies(@cookies);
 my @regAgitations
-    = map { eval($_) } read_file( "${dirDist}/conf/agitations.txt", binmode => ':utf8' );
+    = map { eval($_) } grep {$_} read_file( "${dirDist}/conf/agitations.txt", binmode => ':utf8' );
 my $agent = LWP::UserAgent->new(
     keep_alive            => 4,
     timeout               => 600,
@@ -108,7 +108,7 @@ sub getMetaFromContent {
     my $meta    = {};
 
     #$meta->{'content_full'} = $content;
-    $content =~ /<head>(?<head>[\S\s]+?)<\/head>/;
+    $content =~ /<head(\s+[^>]+)?>(?<head>[\S\s]+?)<\/head>/;
     my $head = $+{'head'};
     $meta->{'title'} = getTitle($head) || getTitle($content) || '';
     $head =~ s/<script[^>]*>[\S\s]*?<\/script>//g;
