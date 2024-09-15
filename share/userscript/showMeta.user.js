@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-13_19:01
+// @version      2024-09-13_19:03
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -24,8 +24,6 @@
   const xpathContentLinks = './/a[('
     + supportedHosts.map(host => 'contains(@href, "//' + host + '/")').join(' or ')
     + ') and not(@data-informed) and not(@data-index)]';
-  const regTitleAd = /(\s?[\|│]\s?電子書籍ストア\s?-\s?BOOK☆WALKER(\s?R-18館)?|\s?[\|│]\s?電子書籍無料試し読みならBOOK☆WALKER(\sR-18館)?|[\(\（](マンガ[\(\（]漫画[\)\）](\、画集)?|ライトノベル|新文芸)[\)\）]の電子書籍無料試し読みならBOOK☆WALKER)$/;
-  const regDescAd = /((BOOK☆WALKERでは)?KADOKAWAグループ内外の電子書籍を数多く配信中。新着のマンガ（漫画）・ライトノベル、文芸・小説、新書、実用書、写真集、雑誌など幅広く掲載。)$/;
   const history = {};
   let index = 0;
   await sleep(3000);
@@ -71,7 +69,9 @@
         history[key] = true;
         return !checked;
       });
-    while (links.length > 0 && inform(links.splice(0, 10))) { }
+    while (links.length > 0) {
+      inform(links.splice(0, 10))
+    }
   }
 
   async function inform(links) {
@@ -83,10 +83,7 @@
       link.target = '_blank';
       link.dataset.informed = 1;
       const meta = result.metas[link.href];
-      const title = (meta['_title'] || '').replace(regTitleAd, '');
-      if (!title) { return; }
-      const urlImage = meta['_image'];
-      const description = (meta['_description'] || '').replace(regDescAd, '');
+      if (!meta['_title']) { return; }
       const div = d.createElement('div');
       link.parentNode.replaceChild(div, link);
       div.appendChild(link);
@@ -101,14 +98,14 @@
               {
                 tag: 'img',
                 classes: ['popup_thumbnail'],
-                src: urlImage,
+                src: meta['_image'],
                 height: heightThumbnail,
                 loading: 'lazy',
               },
               {
                 tag: 'img',
                 classes: ['popup_popup'],
-                src: urlImage,
+                src: meta['_image'],
                 loading: 'lazy',
                 dataset: { large: 1 },
               },
@@ -120,11 +117,11 @@
               {
                 tag: 'div',
                 classes: ['showMeta_title'],
-                textContent: title,
+                textContent: meta['_title'],
               },
               {
                 tag: 'div',
-                textContent: description,
+                textContent: meta['_description'],
               },
             ],
           },

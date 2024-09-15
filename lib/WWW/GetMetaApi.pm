@@ -19,13 +19,15 @@ use version 0.77; our $VERSION = version->declare("v0.0.1");
 
 $YAML::Syck::ImplicitUnicode = 1;
 
-our @EXPORT = qw(getMeta);
+our @EXPORT = qw(getMeta removeAgitations);
 
 my $json    = JSON::XS->new->utf8(0)->pretty->allow_nonref(1);
 my $dirDist = dist_dir('WWW-GetMetaApi');
 my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
 my $jar     = HTTP::CookieJar::LWP->new->load_cookies(@cookies);
-my $agent   = LWP::UserAgent->new(
+my @regAgitations
+    = map { eval($_) } read_file( "${dirDist}/conf/agitations.txt", binmode => ':utf8' );
+my $agent = LWP::UserAgent->new(
     keep_alive            => 4,
     timeout               => 600,
     requests_redirectable => [ 'GET', 'HEAD' ],
@@ -116,13 +118,16 @@ sub getMetaFromContent {
         $meta->{ trim( $+{'name'} ) } = trim( $+{'content'} ) || '';
     }
     $meta->{'_title'}
-        = $meta->{'twitter:title'} || $meta->{'og:title'} || $meta->{'title'} || undef;
-    $meta->{'_image'} = $meta->{'twitter:image'} || $meta->{'og:image'} || undef;
+        = removeAgitations( $meta->{'twitter:title'}
+            || $meta->{'og:title'}
+            || $meta->{'title'}
+            || '' );
+    $meta->{'_image'} = $meta->{'twitter:image'} || $meta->{'og:image'} || '';
     $meta->{'_description'}
-        = $meta->{'twitter:description'}
-        || $meta->{'og:description'}
-        || $meta->{'description'}
-        || undef;
+        = removeAgitations( $meta->{'twitter:description'}
+            || $meta->{'og:description'}
+            || $meta->{'description'}
+            || '' );
     return $meta;
 }
 
@@ -130,6 +135,14 @@ sub getTitle {
     my $text = shift or return;
     $text =~ /<title>(?<title>[\S\s]+?)<\/title>/;
     return trim( $+{'title'} ) || '';
+}
+
+sub removeAgitations {
+    my $text = shift or return '';
+    foreach my $reg (@regAgitations) {
+        $text =~ s/$reg//;
+    }
+    return $text;
 }
 
 1;
