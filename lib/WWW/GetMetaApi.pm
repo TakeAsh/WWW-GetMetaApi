@@ -138,7 +138,7 @@ __END__
 
 =head1 NAME
 
-WWW::GetMetaApi - It's new $module
+WWW::GetMetaApi - Gets the meta data on other web sites, and can be called from *.user.js
 
 =head1 SYNOPSIS
 
@@ -146,7 +146,7 @@ WWW::GetMetaApi - It's new $module
 
 =head1 DESCRIPTION
 
-WWW::GetMetaApi is ...
+WWW::GetMetaApi is an api to be used from some user scripts, and return the meta data of other web sites.
 
 =head1 LICENSE
 

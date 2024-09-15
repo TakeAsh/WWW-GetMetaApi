@@ -1,7 +1,7 @@
 
 # NAME
 
-WWW::GetMetaApi - It's new $module
+WWW::GetMetaApi - Gets the meta data on other web sites, and can be called from \*.user.js
 
 # SYNOPSIS
 
@@ -9,7 +9,7 @@ WWW::GetMetaApi - It's new $module
 
 # DESCRIPTION
 
-WWW::GetMetaApi is ...
+WWW::GetMetaApi is an api to be used from some user scripts, and return the meta data of other web sites.
 
 # LICENSE
 
@@ -20,4 +20,4 @@ it under the same terms as Perl itself.
 
 # AUTHOR
 
-TakeAsh &lt;take@TakeAsh.net>
+[TakeAsh68k](https://github.com/TakeAsh/)
