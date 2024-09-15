@@ -42,7 +42,17 @@
       },
       "runtime" : {
          "requires" : {
-            "perl" : "5.010"
+            "Encode" : "0",
+            "File::Share" : "0",
+            "File::Slurp" : "0",
+            "FindBin::libs" : "0",
+            "HTTP::CookieJar::LWP" : "0",
+            "JSON::XS" : "0",
+            "LWP::UserAgent" : "0",
+            "YAML::Syck" : "0",
+            "feature" : "0",
+            "perl" : "5.010",
+            "version" : "0.77"
          }
       },
       "test" : {

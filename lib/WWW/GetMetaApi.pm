@@ -11,6 +11,7 @@ use JSON::XS;
 use LWP::UserAgent;
 use HTTP::CookieJar::LWP ();
 use File::Slurp;
+use File::Share ':all';
 use FindBin::libs "Bin=${FindBin::RealBin}";
 use open ':std' => ':utf8';
 
@@ -21,7 +22,8 @@ $YAML::Syck::ImplicitUnicode = 1;
 our @EXPORT = qw(getMeta);
 
 my $json    = JSON::XS->new->utf8(0)->pretty->allow_nonref(1);
-my @cookies = read_file( "${FindBin::RealBin}/../conf/cookies.txt", binmode => ':utf8' );
+my $dirDist = dist_dir('WWW-GetMetaApi');
+my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
 my $jar     = HTTP::CookieJar::LWP->new->load_cookies(@cookies);
 my $agent   = LWP::UserAgent->new(
     keep_alive            => 4,
