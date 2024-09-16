@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-16_04:02
+// @version      2024-09-16_04:12
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -19,6 +19,14 @@
   const heightThumbnail = 96;
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
   const xpathContentLinks = './/a[(starts-with(@href, "http")) and not(@data-informed) and not(@data-index)]';
+  const quotemeta = (text) => text.trim().replace(/([^0-9A-Za-z_])/g, '\\$1');
+  const keySettings = 'ShowMetaSettings';
+  const settings = JSON.parse(localStorage.getItem(keySettings) || '{"IgnoreDomains":"twitter.com\\nx.com\\nyoutu.be\\nyoutube.com"}');
+  const listIgnoreDomains = settings.IgnoreDomains.split('\n')
+    .filter(domain => !!domain)
+    .map(domain => quotemeta(domain));
+  const regIgnoreDomains = !listIgnoreDomains || !listIgnoreDomains.length ? null
+    : new RegExp(`:\/\/(${listIgnoreDomains.join('|')})\/`);
   const history = {};
   let index = 0;
   await sleep(3000);
@@ -45,7 +53,16 @@
     '.popup_base:hover .popup_popup': {
       display: 'block',
     },
+    '#panelShowMeta': {
+      position: 'fixed',
+      top: '8em',
+      right: '0',
+      padding: '4px',
+      zIndex: '16',
+      textAlign: 'right',
+    },
   });
+  addPanelSettings();
   const target = getNodesByXpath('//div[@class = "thre" or @class = "text"]')[0]
     || d.body;
   checkLinks(target);
@@ -54,9 +71,55 @@
       (mutation) => checkLinks(mutation.target)));
   observer.observe(target, { childList: true, subtree: true, });
 
+  function addPanelSettings() {
+    d.body.appendChild(prepareElement({
+      tag: 'div',
+      id: 'panelShowMeta',
+      children: [
+        {
+          tag: 'details',
+          children: [
+            {
+              tag: 'summary',
+              innerHTML: '&#x2699;',
+              title: 'ShowMeta Settings',
+            },
+            {
+              tag: 'div',
+              children: [
+                {
+                  tag: 'textarea',
+                  id: 'textareaIgnoreDomains',
+                  title: 'Ignore Domains',
+                  placeholder: 'Ignore Domains',
+                  cols: 20,
+                  rows: 8,
+                }
+              ],
+            }
+          ],
+          events: {
+            toggle: (event) => {
+              const details = event.target;
+              const textareaIgnoreDomains = details.querySelector('#textareaIgnoreDomains');
+              if (details.open) {
+                textareaIgnoreDomains.value = settings.IgnoreDomains;
+              } else {
+                settings.IgnoreDomains = textareaIgnoreDomains.value
+                  .trim().split('\n').sort().join('\n');
+                localStorage.setItem(keySettings, JSON.stringify(settings));
+              }
+            },
+          },
+        }
+      ],
+    }));
+  }
+
   function checkLinks(node) {
     if (!node) { return; }
     const links = getNodesByXpath(xpathContentLinks, node)
+      .filter(link => !(regIgnoreDomains && regIgnoreDomains.test(link)))
       .map(link => { link.dataset.index = ++index; return link; })
       .filter(link => {
         const key = link + '?' + link.dataset.index;
