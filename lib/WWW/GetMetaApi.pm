@@ -42,15 +42,15 @@ sub getMeta {
     $agent->agent( $client->{'HTTP_USER_AGENT'} );
     my @forwarded = ();
     if ( $client->{'HTTP_X_FORWARDED_FOR'} ) {
-        warn( 'HTTP_X_FORWARDED_FOR: ' . $client->{'HTTP_X_FORWARDED_FOR'} );
+        warn( 'HTTP_X_FORWARDED_FOR: ' . $client->{'HTTP_X_FORWARDED_FOR'} . "\n" );
         push( @forwarded, split( /\s*,\s*/, $client->{'HTTP_X_FORWARDED_FOR'} ) );
     }
     if ( $client->{'HTTP_FORWARDED'} ) {
-        warn( 'HTTP_FORWARDED: ' . $client->{'HTTP_FORWARDED'} );
+        warn( 'HTTP_FORWARDED: ' . $client->{'HTTP_FORWARDED'} . "\n" );
         push( @forwarded, $client->{'HTTP_FORWARDED'} =~ /for=([^,;]+)/g );
     }
     push( @forwarded, $client->{'CLIENT_IP'} );
-    warn( 'Remote: ' . join( ", ", @forwarded ) );
+    warn( 'Forwarded: ' . join( ", ", @forwarded ) . "\n" );
     $agent->default_header( 'X-Forwarded-For' => join( ', ', @forwarded ) );
     $agent->default_header( 'Forwarded'       => join( ', ', map {"for=$_"} @forwarded ) );
     my $metas = {};
