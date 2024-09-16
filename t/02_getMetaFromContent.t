@@ -134,6 +134,23 @@ subtest 'getMetaFromContent' => sub {
         _title: Title1
         _description: Desc1
         _image: Img1
+-   label: 'extra property before'
+    input: |
+        <html>
+            <head>
+                <title data-some="true">Title</title>
+                <meta data-some="true" name="title" content="Title1">
+                <meta data-some="true" name="description" content="Desc1"/>
+                <meta data-some="true" name="og:image" content="Img1"  />
+            </head>
+        </html>
+    expected:
+        title: Title1
+        description: Desc1
+        "og:image": Img1
+        _title: Title1
+        _description: Desc1
+        _image: Img1
 -   label: 'reverse, extra property'
     input: |
         <html>

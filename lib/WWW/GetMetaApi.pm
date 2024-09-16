@@ -118,8 +118,8 @@ sub getMetaFromContent {
     $meta->{'title'} = getTitle($head) || getTitle($content) || '';
     $head =~ s/<script[^>]*>[\S\s]*?<\/script>//g;
     while (
-        $head =~ /<meta \s+
-        content="(?<content>[^"]+)" [\s\S]*?\s
+        $head =~ /<meta [^><]*?\s
+        content="(?<content>[^"]+)" [^><]*?\s
         (name|property)="(?<name>[^"]+)" [^>]*
         \/?>/gx
         )
@@ -127,8 +127,8 @@ sub getMetaFromContent {
         $meta->{ trim_decode( $+{'name'} ) } = trim_decode( $+{'content'} );
     }
     while (
-        $head =~ /<meta \s+
-        (name|property)="(?<name>[^"]+)" [\s\S]*?\s
+        $head =~ /<meta [^><]*?\s
+        (name|property)="(?<name>[^"]+)" [^><]*?\s
         content="(?<content>[^"]+)" [^>]*
         \/?>/gx
         )
@@ -151,7 +151,7 @@ sub getMetaFromContent {
 
 sub getTitle {
     my $text = shift or return;
-    $text =~ /<title>(?<title>[\S\s]+?)<\/title>/;
+    $text =~ /<title[^>]*>(?<title>[\S\s]+?)<\/title>/;
     return trim_decode( $+{'title'} );
 }
 
