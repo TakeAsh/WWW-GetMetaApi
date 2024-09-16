@@ -20,7 +20,7 @@ use version 0.77; our $VERSION = version->declare("v0.0.1");
 
 $YAML::Syck::ImplicitUnicode = 1;
 
-our @EXPORT = qw(getMeta removeAgitations);
+our @EXPORT = qw(getMeta getMetaFromContent removeAgitations);
 
 my $json    = JSON::XS->new->utf8(0)->pretty->allow_nonref(1);
 my $dirDist = dist_dir('WWW-GetMetaApi');
@@ -104,6 +104,10 @@ sub splitUris {
     return sort( keys(%uris) );
 }
 
+sub trim_decode {
+    return trim( decode_entities( shift || '' ) );
+}
+
 sub getMetaFromContent {
     my $content = shift or return undef;
     my $meta    = {};
@@ -114,29 +118,41 @@ sub getMetaFromContent {
     $meta->{'title'} = getTitle($head) || getTitle($content) || '';
     $head =~ s/<script[^>]*>[\S\s]*?<\/script>//g;
     while (
-        $head =~ /<meta\s+(name|property)="(?<name>[^"]+)"\s+content="(?<content>[^"]+)"\s*\/?>/g )
+        $head =~ /<meta \s+
+        content="(?<content>[^"]+)" [\s\S]*?\s
+        (name|property)="(?<name>[^"]+)" [^>]*
+        \/?>/gx
+        )
     {
-        $meta->{ trim( decode_entities( $+{'name'} ) ) }
-            = trim( decode_entities( $+{'content'} ) ) || '';
+        $meta->{ trim_decode( $+{'name'} ) } = trim_decode( $+{'content'} );
+    }
+    while (
+        $head =~ /<meta \s+
+        (name|property)="(?<name>[^"]+)" [\s\S]*?\s
+        content="(?<content>[^"]+)" [^>]*
+        \/?>/gx
+        )
+    {
+        $meta->{ trim_decode( $+{'name'} ) } = trim_decode( $+{'content'} );
     }
     $meta->{'_title'}
         = removeAgitations( $meta->{'twitter:title'}
             || $meta->{'og:title'}
             || $meta->{'title'}
             || '' );
-    $meta->{'_image'} = $meta->{'twitter:image'} || $meta->{'og:image'} || '';
     $meta->{'_description'}
         = removeAgitations( $meta->{'twitter:description'}
             || $meta->{'og:description'}
             || $meta->{'description'}
             || '' );
+    $meta->{'_image'} = $meta->{'twitter:image'} || $meta->{'og:image'} || '';
     return $meta;
 }
 
 sub getTitle {
     my $text = shift or return;
     $text =~ /<title>(?<title>[\S\s]+?)<\/title>/;
-    return trim( decode_entities( $+{'title'} || '' ) ) || '';
+    return trim_decode( $+{'title'} );
 }
 
 sub removeAgitations {
