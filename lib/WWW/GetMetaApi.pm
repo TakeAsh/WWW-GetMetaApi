@@ -110,7 +110,7 @@ sub getMetaFromContent {
 
     #$meta->{'content_full'} = $content;
     $content =~ /<head(\s+[^>]+)?>(?<head>[\S\s]+?)<\/head>/;
-    my $head = $+{'head'};
+    my $head = $+{'head'} || '';
     $meta->{'title'} = getTitle($head) || getTitle($content) || '';
     $head =~ s/<script[^>]*>[\S\s]*?<\/script>//g;
     while (
@@ -136,7 +136,7 @@ sub getMetaFromContent {
 sub getTitle {
     my $text = shift or return;
     $text =~ /<title>(?<title>[\S\s]+?)<\/title>/;
-    return trim( decode_entities( $+{'title'} ) ) || '';
+    return trim( decode_entities( $+{'title'} || '' ) ) || '';
 }
 
 sub removeAgitations {
