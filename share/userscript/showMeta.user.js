@@ -1,13 +1,13 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-16_04:12
+// @version      2024-09-16_04:13
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
 // @match        http://*.2chan.net/*/res/*
 // @match        https://tsumanne.net/*
-// @match        http://kako.futakuro.com/futa/*
+// @match        https://kako.futakuro.com/futa/*
 // @match        http://*.ftbucket.info/*/cont/*
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/PrepareElement.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=x.com
