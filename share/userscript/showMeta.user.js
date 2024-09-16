@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-16_04:13
+// @version      2024-09-16_04:14
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -141,7 +141,7 @@
       link.target = '_blank';
       link.dataset.informed = 1;
       const meta = result.metas[link.href];
-      if (!meta['_title']) { return; }
+      if (!meta || !meta['_title']) { return; }
       const spanMetaLink = d.createElement('span');
       link.parentNode.replaceChild(spanMetaLink, link);
       spanMetaLink.appendChild(link);
