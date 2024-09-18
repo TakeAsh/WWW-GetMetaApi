@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-16_04:14
+// @version      2024-09-16_04:15
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -99,21 +99,26 @@
             }
           ],
           events: {
-            toggle: (event) => {
-              const details = event.target;
-              const textareaIgnoreDomains = details.querySelector('#textareaIgnoreDomains');
-              if (details.open) {
-                textareaIgnoreDomains.value = settings.IgnoreDomains;
-              } else {
-                settings.IgnoreDomains = textareaIgnoreDomains.value
-                  .trim().split('\n').sort().join('\n');
-                localStorage.setItem(keySettings, JSON.stringify(settings));
-              }
-            },
+            toggle: onSettingsToggle,
           },
         }
       ],
     }));
+  }
+
+  function onSettingsToggle(event) {
+    const details = event.target;
+    const textareaIgnoreDomains = details.querySelector('#textareaIgnoreDomains');
+    if (details.open) {
+      textareaIgnoreDomains.value = settings.IgnoreDomains;
+    } else {
+      const hashDomains = textareaIgnoreDomains.value.trim().split('\n').reduce(
+        (acc, cur) => { acc[cur.trim()] = 1; return acc; },
+        {}
+      )
+      settings.IgnoreDomains = Object.keys(hashDomains).sort().join('\n');
+      localStorage.setItem(keySettings, JSON.stringify(settings));
+    }
   }
 
   function checkLinks(node) {
