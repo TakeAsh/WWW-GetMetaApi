@@ -22,6 +22,14 @@ $YAML::Syck::ImplicitUnicode = 1;
 
 our @EXPORT = qw(getMeta getMetaFromContent removeAgitations);
 
+my $default_header = {
+    USER_AGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    ACCEPT     =>
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    ACCEPT_ENCODING => 'gzip, deflate, br, zstd',
+    ACCEPT_LANGUAGE => 'ja,en-US;q=0.9,en;q=0.8',
+};
+
 my $json    = JSON::XS->new->utf8(0)->pretty->allow_nonref(1);
 my $dirDist = dist_dir('WWW-GetMetaApi');
 my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
@@ -39,7 +47,7 @@ sub getMeta {
     my $query  = shift || {};
     my $uris   = shift;
     my $client = getClientInfo();
-    $agent->agent( $client->{'HTTP_USER_AGENT'} );
+    $agent->agent( $client->{'HTTP_USER_AGENT'} || $default_header->{'USER_AGENT'} );
     my @forwarded = ();
     if ( $client->{'HTTP_X_FORWARDED_FOR'} ) {
         warn( 'HTTP_X_FORWARDED_FOR: ' . $client->{'HTTP_X_FORWARDED_FOR'} . "\n" );
@@ -53,10 +61,17 @@ sub getMeta {
     warn( 'Forwarded: ' . join( ", ", @forwarded ) . "\n" );
     $agent->default_header( 'X-Forwarded-For' => join( ', ', @forwarded ) );
     $agent->default_header( 'Forwarded'       => join( ', ', map {"for=$_"} @forwarded ) );
+
+#$agent->default_header( 'Accept'          => $default_header->{'ACCEPT'} );
+#$agent->default_header( 'Accept-Encoding' => $client->{'HTTP_ACCEPT_ENCODING'} || $default_header->{'ACCEPT_ENCODING'} );
+#$agent->default_header( 'Accept-Language' => $client->{'HTTP_ACCEPT_LANGUAGE'} || $default_header->{'ACCEPT_LANGUAGE'} );
+    $agent->default_header( 'Referer' => $client->{'HTTP_REFERER'} || '' );
     my $metas = {};
     my @uris  = splitUris( @{$uris} );
     foreach my $uri (@uris) {
         my $response = $agent->get($uri);
+
+        #warn( 'decoded_content: ' . $response->decoded_content . "\n" );
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
     }
     return $json->encode(
