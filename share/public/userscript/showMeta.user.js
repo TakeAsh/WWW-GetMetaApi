@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-21_13:00
+// @version      2024-09-21_13:02
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -397,7 +397,7 @@
       ],
       events: { toggle: onSettingsToggle, },
     }));
-    setPosition(settings.position);
+    setPosition(settings.Position);
     setIconSize(settings.IconSize);
   }
 
@@ -420,7 +420,7 @@
     Position.forEach(pos => { panel.classList.remove(`position_${pos}`); });
     panel.classList.add(`position_${position}`);
     const title = d.getElementById('titleShowMeta');
-    if ([Position.RIGHT_TOP, Position.RIGHT_BOTTOM].includes(position)) {
+    if (position == Position.RIGHT_TOP || position == Position.RIGHT_BOTTOM) {
       title.classList.add('alignRight');
     } else {
       title.classList.remove('alignRight');
