@@ -2,6 +2,7 @@ requires 'Encode';
 requires 'File::Share';
 requires 'File::Slurp';
 requires 'FindBin::libs';
+requires 'HTML::Entities';
 requires 'HTTP::CookieJar::LWP';
 requires 'JSON::XS';
 requires 'LWP::UserAgent';
@@ -16,4 +17,5 @@ on configure => sub {
 
 on test => sub {
     requires 'Test::More', '0.98';
+    requires 'Test::More::UTF8';
 };
