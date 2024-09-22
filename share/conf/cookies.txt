@@ -1,3 +1,4 @@
 otonaStoreAgreed=1; Domain=bookwalker.jp; Path=/
 age_check_done=1; Domain=dmm.co.jp; Path=/
 wants_mature_content=1; Domain=store.steampowered.com; Path=/
+OptanonAlertBoxClosed=2024-09-21T22:30:00.000Z; Domain=p-bandai.jp; Path=/
