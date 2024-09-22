@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
 // @version      2024-09-21_13:02
@@ -21,7 +21,7 @@
   'use strict';
   const heightThumbnail = 96;
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
-  const uriIconBase = 'https://github.com/TakeAsh/WWW-GetMetaApi/raw/refs/heads/master/share/public/image';
+  const uriIconBase = 'https://raw.githubusercontent.com/TakeAsh/WWW-GetMetaApi/refs/heads/master/share/public/image';
   const xpathContentLinks = './/a[(starts-with(@href, "http")) and not(@data-informed) and not(@data-index)]';
   const quotemeta = (text) => text.trim().replace(/([^0-9A-Za-z_])/g, '\\$1');
   const Network = new CyclicEnum('NEVER', 'NOT_CELLULAR', 'ANY');
