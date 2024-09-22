@@ -75,12 +75,12 @@ sub getMeta {
         #warn( 'decoded_content: ' . $response->decoded_content . "\n" );
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
     }
-    return $json->encode(
-        {   metas  => $metas,
-            query  => $query,
-            client => $client,
-        }
-    );
+    my $result = {
+        metas  => $metas,
+        query  => $query,
+        client => $client,
+    };
+    return $json->encode($result);
 }
 
 sub trim {
