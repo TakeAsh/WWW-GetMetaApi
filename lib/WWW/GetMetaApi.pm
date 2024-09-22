@@ -64,7 +64,8 @@ sub getMeta {
     $agent->default_header( 'Accept'          => $default_header->{'ACCEPT'} );
 
 #$agent->default_header( 'Accept-Encoding' => $client->{'HTTP_ACCEPT_ENCODING'} || $default_header->{'ACCEPT_ENCODING'} );
-#$agent->default_header( 'Accept-Language' => $client->{'HTTP_ACCEPT_LANGUAGE'} || $default_header->{'ACCEPT_LANGUAGE'} );
+    $agent->default_header( 'Accept-Language' => $client->{'HTTP_ACCEPT_LANGUAGE'}
+            || $default_header->{'ACCEPT_LANGUAGE'} );
     $agent->default_header( 'Referer' => $client->{'HTTP_REFERER'} || '' );
     my $metas = {};
     my @uris  = splitUris( @{$uris} );
