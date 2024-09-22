@@ -1,7 +1,7 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-21_13:02
+// @version      2024-09-22_17:30
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -40,6 +40,10 @@
   }, 'ShowMetaSettings');
   const regDomainList = !settings.Domain.List.length ? null
     : new RegExp(`:\/\/(${settings.Domain.List.map(domain => quotemeta(domain)).join('|')})\/`);
+  const regForceIgnoreUrls = new RegExp([
+    '://dec.2chan.net/up/',
+    '://dec.2chan.net/up2/'
+  ].map(domain => quotemeta(domain)).join('|'));
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const connectionType = connection.type || connection.effectiveType;
   console.log({ SettingNetwork: settings.Network, ConnectionType: connectionType, });
@@ -443,6 +447,7 @@
   }
 
   function isTargetLink(link) {
+    if (regForceIgnoreUrls.test(link.href)) { return false; }
     return (settings.Domain.Type == DomainType.ALLOW && !!regDomainList && regDomainList.test(link.href))
       || (settings.Domain.Type == DomainType.DENY && (!regDomainList || !regDomainList.test(link.href)));
   }
