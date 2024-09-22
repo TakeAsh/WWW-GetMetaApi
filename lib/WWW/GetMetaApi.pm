@@ -30,7 +30,7 @@ my $default_header = {
     ACCEPT_LANGUAGE => 'ja,en-US;q=0.9,en;q=0.8',
 };
 
-my $json    = JSON::XS->new->utf8(0)->pretty->allow_nonref(1);
+my $json    = JSON::XS->new->utf8(0)->pretty->canonical->allow_nonref(1);
 my $dirDist = dist_dir('WWW-GetMetaApi');
 my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
 my $jar     = HTTP::CookieJar::LWP->new->load_cookies(@cookies);
