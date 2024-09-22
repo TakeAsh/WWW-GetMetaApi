@@ -23,7 +23,6 @@
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
   const uriIconBase = 'https://raw.githubusercontent.com/TakeAsh/WWW-GetMetaApi/refs/heads/master/share/public/image';
   const xpathContentLinks = './/a[(starts-with(@href, "http")) and not(@data-informed) and not(@data-index)]';
-  const quotemeta = (text) => text.trim().replace(/([^0-9A-Za-z_])/g, '\\$1');
   const Network = new CyclicEnum('NEVER', 'NOT_CELLULAR', 'ANY');
   const DomainType = new CyclicEnum('ALLOW', 'DENY');
   const Position = new CyclicEnum('LEFT_TOP', 'RIGHT_TOP', 'LEFT_BOTTOM', 'RIGHT_BOTTOM');
