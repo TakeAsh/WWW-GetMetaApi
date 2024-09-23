@@ -6,11 +6,11 @@ use utf8;
 use feature qw(say);
 use Encode;
 use Exporter 'import';
-use YAML::Syck qw( LoadFile DumpFile Dump );
+use YAML::Syck qw(LoadFile DumpFile Dump);
 use JSON::XS;
 use LWP::UserAgent;
 use HTTP::CookieJar::LWP ();
-use File::Slurp;
+use File::Slurp          qw(read_file write_file);
 use File::Share ':all';
 use HTML::Entities;
 use FindBin::libs "Bin=${FindBin::RealBin}";
@@ -23,25 +23,24 @@ $YAML::Syck::ImplicitUnicode = 1;
 our @EXPORT = qw(getMeta getMetaFromContent removeAgitations);
 
 my $default_header = {
-    USER_AGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    ACCEPT     =>
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    USER_AGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    ACCEPT          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     ACCEPT_ENCODING => 'gzip, deflate, br, zstd',
     ACCEPT_LANGUAGE => 'ja,en-US;q=0.9,en;q=0.8',
 };
 
-my $json    = JSON::XS->new->utf8(0)->pretty->canonical->allow_nonref(1);
-my $dirDist = dist_dir('WWW-GetMetaApi');
-my @cookies = read_file( "${dirDist}/conf/cookies.txt", binmode => ':utf8' );
-my $jar     = HTTP::CookieJar::LWP->new->load_cookies(@cookies);
-my @regAgitations
-    = map { eval($_) } grep {$_} read_file( "${dirDist}/conf/agitations.txt", binmode => ':utf8' );
-my $agent = LWP::UserAgent->new(
+my $json          = JSON::XS->new->utf8(0)->pretty->canonical->allow_nonref(1);
+my $dirConf       = dist_dir('WWW-GetMetaApi') . '/conf';
+my $jar           = HTTP::CookieJar::LWP->new->load_cookies( readFileTrim('cookies.txt') );
+my @regAgitations = map { eval($_) } readFileTrim('agitations.txt');
+my $agent         = LWP::UserAgent->new(
     keep_alive            => 4,
     timeout               => 60,
     requests_redirectable => [ 'GET', 'HEAD' ],
     cookie_jar            => $jar,
 );
+my $regNoAcceptEncodingDomains
+    = join( '|', map { quotemeta($_) } readFileTrim('NoAcceptEncodingDomains.txt') );
 
 sub getMeta {
     my $query  = shift || {};
@@ -62,25 +61,31 @@ sub getMeta {
     $agent->default_header( 'X-Forwarded-For' => join( ', ', @forwarded ) );
     $agent->default_header( 'Forwarded'       => join( ', ', map {"for=$_"} @forwarded ) );
     $agent->default_header( 'Accept'          => $default_header->{'ACCEPT'} );
-    $agent->default_header( 'Accept-Encoding' => $client->{'HTTP_ACCEPT_ENCODING'}
-            || $default_header->{'ACCEPT_ENCODING'} );
-    $agent->default_header( 'Accept-Language' => $client->{'HTTP_ACCEPT_LANGUAGE'}
-            || $default_header->{'ACCEPT_LANGUAGE'} );
-    $agent->default_header( 'Referer' => $client->{'HTTP_REFERER'} || '' );
-    my $metas = {};
-    my @uris  = splitUris( @{$uris} );
-    foreach my $uri (@uris) {
-        my $response = $agent->get($uri);
+    $agent->default_header( 'Referer'         => $client->{'HTTP_REFERER'} || '' );
+    my $acceptLanguage = $client->{'HTTP_ACCEPT_LANGUAGE'} || $default_header->{'ACCEPT_LANGUAGE'};
+    $agent->default_header( 'Accept-Language' => $acceptLanguage );
+    my $acceptEncoding = $client->{'HTTP_ACCEPT_ENCODING'} || $default_header->{'ACCEPT_ENCODING'};
+    my $checkAcceptEncodingDomains
+        = sub { return shift =~ /$regNoAcceptEncodingDomains/ ? undef : $acceptEncoding };
+    my $isDebug = !$client->{'CLIENT_IP'} || $client->{'CLIENT_IP'} eq ( $ENV{'IP_DEBUG'} || '' );
+    my $metas   = {};
 
-        #warn( 'decoded_content: ' . $response->decoded_content . "\n" );
+    foreach my $uri ( splitUris( @{$uris} ) ) {
+        $agent->default_header( 'Accept-Encoding' => $checkAcceptEncodingDomains->($uri) );
+        my $response = $agent->get($uri);
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
+        if ($isDebug) {
+            my %headers = %{ $agent->default_headers() };
+            $metas->{$uri}{'_headers'} = { map { $_ => $headers{$_} || undef } keys(%headers) };
+            $metas->{$uri}{'_content'} = $response->decoded_content;
+        }
     }
-    my $result = {
-        metas  => $metas,
-        query  => $query,
-        client => $client,
-    };
-    return $json->encode($result);
+    return $json->encode(
+        {   metas  => $metas,
+            query  => $query,
+            client => $client,
+        }
+    );
 }
 
 sub trim {
@@ -94,6 +99,11 @@ sub startsWith {
     my $text   = shift or return;
     my $prefix = shift or return;
     return $prefix eq substr( $text, 0, length($prefix) );
+}
+
+sub readFileTrim {
+    my $file = shift or return ();
+    return grep {$_} map { trim($_) } read_file( "${dirConf}/${file}", { binmode => ':utf8' } );
 }
 
 sub getClientInfo {
@@ -127,8 +137,6 @@ sub trim_decode {
 sub getMetaFromContent {
     my $content = shift or return undef;
     my $meta    = {};
-
-    #$meta->{'content_full'} = $content;
     $content =~ /<head(\s+[^>]+)?>(?<head>[\S\s]+?)<\/head>/;
     my $head = $+{'head'} || '';
     $meta->{'title'} = getTitle($head) || getTitle($content) || '';
