@@ -38,7 +38,7 @@ my @regAgitations
     = map { eval($_) } grep {$_} read_file( "${dirDist}/conf/agitations.txt", binmode => ':utf8' );
 my $agent = LWP::UserAgent->new(
     keep_alive            => 4,
-    timeout               => 600,
+    timeout               => 60,
     requests_redirectable => [ 'GET', 'HEAD' ],
     cookie_jar            => $jar,
 );
@@ -62,8 +62,8 @@ sub getMeta {
     $agent->default_header( 'X-Forwarded-For' => join( ', ', @forwarded ) );
     $agent->default_header( 'Forwarded'       => join( ', ', map {"for=$_"} @forwarded ) );
     $agent->default_header( 'Accept'          => $default_header->{'ACCEPT'} );
-
-#$agent->default_header( 'Accept-Encoding' => $client->{'HTTP_ACCEPT_ENCODING'} || $default_header->{'ACCEPT_ENCODING'} );
+    $agent->default_header( 'Accept-Encoding' => $client->{'HTTP_ACCEPT_ENCODING'}
+            || $default_header->{'ACCEPT_ENCODING'} );
     $agent->default_header( 'Accept-Language' => $client->{'HTTP_ACCEPT_LANGUAGE'}
             || $default_header->{'ACCEPT_LANGUAGE'} );
     $agent->default_header( 'Referer' => $client->{'HTTP_REFERER'} || '' );
