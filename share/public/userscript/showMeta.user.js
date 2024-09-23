@@ -22,7 +22,8 @@
   const heightThumbnail = 96;
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
   const uriIconBase = 'https://raw.githubusercontent.com/TakeAsh/WWW-GetMetaApi/refs/heads/master/share/public/image';
-  const xpathContentLinks = './/a[(starts-with(@href, "http")) and not(@data-informed) and not(@data-index)]';
+  const xpathContentLinks = './/a[(contains(@href, "http://") or contains(@href, "https://")) and not(@data-informed) and not(@data-index)]';
+  const regJump = new RegExp(`^${quotemeta(location.origin)}\\/bin\\/jump\\.php\\?`);
   const Network = new CyclicEnum('NEVER', 'NOT_CELLULAR', 'ANY');
   const DomainType = new CyclicEnum('ALLOW', 'DENY');
   const Position = new CyclicEnum('LEFT_TOP', 'RIGHT_TOP', 'LEFT_BOTTOM', 'RIGHT_BOTTOM');
@@ -471,7 +472,10 @@
   async function inform(links) {
     if (!links || !links.length) { return false; }
     const formData = new FormData();
-    links.forEach(link => { formData.append('uri', link.href); });
+    links.forEach(link => {
+      link.href = link.href.replace(regJump, '');
+      formData.append('uri', link.href);
+    });
     const result = await getMeta(formData);
     links.forEach(async (link) => {
       link.target = '_blank';
