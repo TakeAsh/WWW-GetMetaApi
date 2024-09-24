@@ -522,12 +522,7 @@
 
   async function inform(links) {
     if (!links || !links.length) { return false; }
-    const formData = new FormData();
-    links.forEach(link => {
-      link.href = link.href.replace(regJump, '');
-      formData.append('uri', link.href);
-    });
-    const result = await getMeta(formData);
+    const result = await getMeta(links);
     links.forEach(async (link) => {
       link.target = '_blank';
       link.dataset.informed = 1;
@@ -590,7 +585,12 @@
     return true;
   }
 
-  async function getMeta(formData) {
+  async function getMeta(links) {
+    const formData = new FormData();
+    links.forEach(link => {
+      link.href = link.href.replace(regJump, '');
+      formData.append('uri', link.href);
+    });
     const response = await fetch(
       uriGetMeta,
       {
