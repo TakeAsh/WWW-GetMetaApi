@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-22_17:30
+// @version      2024-09-24_22:30
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -52,7 +52,8 @@
   let index = 0;
   await sleep(3000);
   addStyle({
-    '.showMeta_parent': { display: 'flex', },
+    '.showMeta_parent': { display: 'inline', },
+    '.showMeta_content': { display: 'flex', },
     '.showMeta_title': { backgroundColor: '#eeaa88', },
     'img[data-large]': {
       maxWidth: '800px',
@@ -60,9 +61,6 @@
     },
     '.popup_base': {
       position: 'relative',
-    },
-    '.popup_thumbnail': {
-      height: heightThumbnail,
     },
     '.popup_popup': {
       display: 'none',
@@ -482,49 +480,59 @@
       link.dataset.informed = 1;
       const meta = result.metas[link.href];
       if (!meta || !meta['_title']) { return; }
-      const spanMetaLink = d.createElement('span');
-      link.parentNode.replaceChild(spanMetaLink, link);
-      spanMetaLink.appendChild(link);
-      spanMetaLink.appendChild(prepareElement({
-        tag: 'div',
+      const detailsMetaLink = prepareElement({
+        tag: 'details',
         classes: ['showMeta_parent'],
+        open: true,
         children: [
           {
-            tag: 'div',
-            classes: ['popup_base'],
-            children: [
-              {
-                tag: 'img',
-                classes: ['popup_thumbnail'],
-                src: meta['_image'],
-                height: heightThumbnail,
-                loading: 'lazy',
-              },
-              {
-                tag: 'img',
-                classes: ['popup_popup'],
-                src: meta['_image'],
-                loading: 'lazy',
-                dataset: { large: 1 },
-              },
-            ],
+            tag: 'summary',
+            title: meta['_title'],
           },
           {
             tag: 'div',
+            classes: ['showMeta_content'],
             children: [
               {
                 tag: 'div',
-                classes: ['showMeta_title'],
-                textContent: meta['_title'],
+                classes: ['popup_base'],
+                children: [
+                  {
+                    tag: 'img',
+                    src: meta['_image'],
+                    height: heightThumbnail,
+                    loading: 'lazy',
+                  },
+                  {
+                    tag: 'img',
+                    classes: ['popup_popup'],
+                    src: meta['_image'],
+                    loading: 'lazy',
+                    dataset: { large: 1 },
+                  },
+                ],
               },
               {
                 tag: 'div',
-                textContent: meta['_description'],
+                children: [
+                  {
+                    tag: 'div',
+                    classes: ['showMeta_title'],
+                    textContent: meta['_title'],
+                  },
+                  {
+                    tag: 'div',
+                    textContent: meta['_description'],
+                  },
+                ],
               },
+
             ],
           },
         ],
-      }));
+      });
+      link.parentNode.replaceChild(detailsMetaLink, link);
+      detailsMetaLink.querySelector('summary').appendChild(link);
     });
     return true;
   }
