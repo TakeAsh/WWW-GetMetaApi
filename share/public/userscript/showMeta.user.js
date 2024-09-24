@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-24_22:30
+// @version      2024-09-24_23:15
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -36,6 +36,7 @@
         'abema.tv', 'iwara.tv', 'tver.jp', 'twitter.com', 'www.iwara.tv', 'x.com',
       ],
     },
+    InitialOpen: true,
     Position: Position.LEFT_BOTTOM,
     IconSize: IconSize.SMALL,
   }, 'ShowMetaSettings');
@@ -83,6 +84,9 @@
     '.position_LEFT_BOTTOM': { left: '0em', bottom: '0em', },
     '.position_RIGHT_BOTTOM': { right: '0em', bottom: '0em', },
     '.gridNetwork': {
+      display: 'grid',
+    },
+    '.gridInitialOpen': {
       display: 'grid',
     },
     '.gridPosition': {
@@ -245,6 +249,55 @@
                   placeholder: 'Domain List',
                   cols: 16,
                   rows: 8,
+                },
+              ],
+            },
+            {
+              tag: 'fieldset',
+              children: [
+                {
+                  tag: 'legend',
+                  textContent: 'Initial',
+                },
+                {
+                  tag: 'div',
+                  classes: ['gridInitialOpen'],
+                  children: [
+                    {
+                      tag: 'label',
+                      title: 'Left Top',
+                      children: [
+                        {
+                          tag: 'input',
+                          type: 'radio',
+                          name: 'InitialOpen',
+                          checked: !settings.InitialOpen,
+                          events: { change: () => { settings.InitialOpen = false; }, },
+                        },
+                        {
+                          tag: 'span',
+                          textContent: 'Close',
+                        },
+                      ],
+                    },
+                    {
+                      tag: 'label',
+                      title: 'Right Top',
+                      children: [
+                        {
+                          tag: 'input',
+                          type: 'radio',
+                          name: 'InitialOpen',
+                          checked: settings.InitialOpen,
+                          events: { change: () => { settings.InitialOpen = true; }, },
+                        },
+                        {
+                          tag: 'span',
+                          textContent: 'Open',
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
@@ -483,7 +536,7 @@
       const detailsMetaLink = prepareElement({
         tag: 'details',
         classes: ['showMeta_parent'],
-        open: true,
+        open: settings.InitialOpen,
         children: [
           {
             tag: 'summary',
