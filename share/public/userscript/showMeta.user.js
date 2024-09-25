@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
 // @version      2024-09-24_23:15
@@ -508,8 +508,11 @@
     if (!node || !canRunOnNetwork()) { return; }
     const links = getNodesByXpath(xpathContentLinks, node)
       .filter(link => isTargetLink(link))
-      .map(link => { link.dataset.index = ++index; return link; })
-      .filter(link => {
+      .map(link => {
+        link.dataset.index = ++index;
+        link.textContent = decodeURIComponent(link.textContent);
+        return link;
+      }).filter(link => {
         const key = link + '?' + link.dataset.index;
         const checked = history[key];
         history[key] = true;
