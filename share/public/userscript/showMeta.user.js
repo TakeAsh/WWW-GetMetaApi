@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-24_23:15
+// @version      2024-09-26_05:40
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -555,7 +555,7 @@
       .filter(link => isTargetLink(link))
       .map(link => {
         link.dataset.index = ++index;
-        link.textContent = decodeURIComponent(link.textContent);
+        //link.textContent = decodeURIComponent(link.textContent);
         return link;
       }).filter(link => {
         const key = link + '?' + link.dataset.index;
