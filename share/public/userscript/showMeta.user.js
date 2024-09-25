@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
 // @version      2024-09-24_23:15
@@ -26,6 +26,7 @@
   const regJump = new RegExp(`^${quotemeta(location.origin)}\\/bin\\/jump\\.php\\?`);
   const Network = new CyclicEnum('NEVER', 'NOT_CELLULAR', 'ANY');
   const DomainType = new CyclicEnum('ALLOW', 'DENY');
+  const GetMeta = new CyclicEnum('IN_NO_TIME', 'ON_DEMAND');
   const Position = new CyclicEnum('LEFT_TOP', 'RIGHT_TOP', 'LEFT_BOTTOM', 'RIGHT_BOTTOM');
   const IconSize = new CyclicEnum('SMALL', 'MIDDLE', 'LARGE');
   const settings = new AutoSaveConfig({
@@ -36,6 +37,7 @@
         'abema.tv', 'iwara.tv', 'tver.jp', 'twitter.com', 'www.iwara.tv', 'x.com',
       ],
     },
+    GetMeta: GetMeta.IN_NO_TIME,
     InitialOpen: true,
     Position: Position.LEFT_BOTTOM,
     IconSize: IconSize.SMALL,
@@ -73,6 +75,10 @@
     '.popup_base:hover .popup_popup': {
       display: 'block',
     },
+    '.showMeta_buttonGetMeta': {
+      marginLeft: '0.4em',
+      marginRight: '0.4em',
+    },
     '#panelShowMeta': {
       position: 'fixed',
       padding: '4px',
@@ -83,18 +89,12 @@
     '.position_RIGHT_TOP': { right: '0em', top: '0em', },
     '.position_LEFT_BOTTOM': { left: '0em', bottom: '0em', },
     '.position_RIGHT_BOTTOM': { right: '0em', bottom: '0em', },
-    '.gridNetwork': {
-      display: 'grid',
-    },
-    '.gridInitialOpen': {
+    '.gridRow': {
       display: 'grid',
     },
     '.gridPosition': {
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
-    },
-    '.gridIconSize': {
-      display: 'grid',
     },
     '.alignRight': {
       textAlign: 'right',
@@ -139,7 +139,7 @@
                 },
                 {
                   tag: 'div',
-                  classes: ['gridNetwork'],
+                  classes: ['gridRow'],
                   children: [
                     {
                       tag: 'label',
@@ -257,15 +257,61 @@
               children: [
                 {
                   tag: 'legend',
+                  textContent: 'Get Meta',
+                },
+                {
+                  tag: 'div',
+                  classes: ['gridRow'],
+                  children: [
+                    {
+                      tag: 'label',
+                      children: [
+                        {
+                          tag: 'input',
+                          type: 'radio',
+                          name: 'GetMeta',
+                          checked: settings.GetMeta == GetMeta.IN_NO_TIME,
+                          events: { change: () => { settings.GetMeta = GetMeta.IN_NO_TIME; }, },
+                        },
+                        {
+                          tag: 'span',
+                          textContent: 'in No Time',
+                        },
+                      ],
+                    },
+                    {
+                      tag: 'label',
+                      children: [
+                        {
+                          tag: 'input',
+                          type: 'radio',
+                          name: 'GetMeta',
+                          checked: settings.GetMeta == GetMeta.ON_DEMAND,
+                          events: { change: () => { settings.GetMeta = GetMeta.ON_DEMAND; }, },
+                        },
+                        {
+                          tag: 'span',
+                          textContent: 'on Demand',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              tag: 'fieldset',
+              children: [
+                {
+                  tag: 'legend',
                   textContent: 'Initial',
                 },
                 {
                   tag: 'div',
-                  classes: ['gridInitialOpen'],
+                  classes: ['gridRow'],
                   children: [
                     {
                       tag: 'label',
-                      title: 'Left Top',
                       children: [
                         {
                           tag: 'input',
@@ -282,7 +328,6 @@
                     },
                     {
                       tag: 'label',
-                      title: 'Right Top',
                       children: [
                         {
                           tag: 'input',
@@ -393,7 +438,7 @@
                 },
                 {
                   tag: 'div',
-                  classes: ['gridIconSize'],
+                  classes: ['gridRow'],
                   children: [
                     {
                       tag: 'label',
@@ -518,9 +563,38 @@
         history[key] = true;
         return !checked;
       });
-    while (links.length > 0) {
-      inform(links.splice(0, 10))
+    if (settings.GetMeta == GetMeta.ON_DEMAND) {
+      addButtonGetMeta(links);
+    } else {
+      while (links.length > 0) {
+        inform(links.splice(0, 10))
+      }
     }
+  }
+
+  function addButtonGetMeta(links) {
+    links.forEach(link => {
+      const spanButtonGetMeta = prepareElement({
+        tag: 'span',
+        children: [
+          {
+            tag: 'button',
+            classes: ['showMeta_buttonGetMeta'],
+            textContent: 'Meta',
+            events: { click: prepareMeta, },
+          }
+        ],
+      });
+      link.parentNode.replaceChild(spanButtonGetMeta, link);
+      spanButtonGetMeta.insertBefore(link, spanButtonGetMeta.querySelector('button'));
+    });
+  }
+
+  function prepareMeta(event) {
+    const span = event.target.parentNode;
+    const link = span.querySelector('a');
+    span.parentNode.replaceChild(link, span);
+    inform([link]);
   }
 
   async function inform(links) {
