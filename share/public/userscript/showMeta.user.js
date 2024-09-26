@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-26_05:40
+// @version      2024-09-26_22:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -22,7 +22,7 @@
   const heightThumbnail = 96;
   const uriGetMeta = 'https://www.takeash.net/GetMeta/api/getMeta.cgi';
   const uriIconBase = 'https://raw.githubusercontent.com/TakeAsh/WWW-GetMetaApi/refs/heads/master/share/public/image';
-  const xpathContentLinks = './/a[(contains(@href, "http://") or contains(@href, "https://")) and not(@data-informed) and not(@data-index)]';
+  const xpathContentLinks = './/a[starts-with(text(), "http") and not(@data-informed) and not(@data-index)]';
   const regJump = new RegExp(`^${quotemeta(location.origin)}\\/bin\\/jump\\.php\\?`);
   const Network = new CyclicEnum('NEVER', 'NOT_CELLULAR', 'ANY');
   const DomainType = new CyclicEnum('ALLOW', 'DENY');
@@ -555,7 +555,7 @@
       .filter(link => isTargetLink(link))
       .map(link => {
         link.dataset.index = ++index;
-        //link.textContent = decodeURIComponent(link.textContent);
+        link.textContent = decodeURIComponent(link.textContent);
         return link;
       }).filter(link => {
         const key = link + '?' + link.dataset.index;
