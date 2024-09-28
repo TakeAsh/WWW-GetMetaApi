@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-26_22:00
+// @version      2024-09-28_17:30
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -56,7 +56,10 @@
   await sleep(3000);
   addStyle({
     '.showMeta_parent': { display: 'inline', },
-    '.showMeta_content': { display: 'flex', },
+    '.showMeta_content': {
+      display: 'flex',
+      backgroundColor: 'rgb(255 255 255 / 50%)',
+    },
     '.showMeta_title': { backgroundColor: '#eeaa88', },
     'img[data-large]': {
       maxWidth: '800px',
