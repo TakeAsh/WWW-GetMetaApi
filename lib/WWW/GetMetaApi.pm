@@ -73,6 +73,10 @@ sub getMeta {
     foreach my $uri ( splitUris( @{$uris} ) ) {
         $agent->default_header( 'Accept-Encoding' => $checkAcceptEncodingDomains->($uri) );
         my $response = $agent->get($uri);
+        if ( startsWith( $response->header('Content-Type'), 'image/' ) ) {
+            $metas->{$uri} = undef;
+            next;
+        }
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
         if ( substr( $metas->{$uri}{'_image'}, 0, 1 ) eq '/'
             && $uri =~ /^(?<origin>https?:\/\/[^\/]+)/ )
@@ -81,7 +85,10 @@ sub getMeta {
         }
         if ($isDebug) {
             my %headers = %{ $agent->default_headers() };
-            $metas->{$uri}{'_headers'} = { map { $_ => $headers{$_} || undef } keys(%headers) };
+            $metas->{$uri}{'_request_headers'}
+                = { map { $_ => $headers{$_} || undef } keys(%headers) };
+            $metas->{$uri}{'_response_headers'}
+                = { map { $_ => $response->header($_) || undef } $response->header_field_names };
             $metas->{$uri}{'_content'} = $response->decoded_content;
         }
     }
