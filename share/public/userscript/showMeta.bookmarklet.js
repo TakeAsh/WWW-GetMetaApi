@@ -19,7 +19,6 @@
     d.head.appendChild(script);
   });
   for (const group of scripts) {
-    const results = await Promise.all(group.map((src) => loadScript(src)));
-    console.log(results);
+    console.log(await Promise.all(group.map((src) => loadScript(src))));
   }
 })(document);
