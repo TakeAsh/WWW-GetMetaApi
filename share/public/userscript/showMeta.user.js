@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-09-30_22:30
+// @version      2024-10-01_06:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -563,7 +563,7 @@
       .filter(link => isTargetLink(link))
       .map(link => {
         link.dataset.index = ++index;
-        link.textContent = decodeURIComponent(link.textContent);
+        link.textContent = modifyLinkText(link.textContent);
         return link;
       }).filter(link => {
         const key = link + '?' + link.dataset.index;
@@ -578,6 +578,11 @@
         inform(links.splice(0, 10))
       }
     }
+  }
+
+  function modifyLinkText(text) {
+    return decodeURIComponent(text)
+      .replace(/(?<symbol>[\/?&])/g, '\u{200b}$<symbol>');
   }
 
   function addButtonGetMeta(links) {
