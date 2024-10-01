@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-10-01_06:00
+// @version      2024-10-01_22:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -93,7 +93,8 @@
     '.position_LEFT_BOTTOM': { left: '0em', bottom: '0em', },
     '.position_RIGHT_BOTTOM': { right: '0em', bottom: '0em', },
     '.panelShowMetaSettings': {
-      height: '20em',
+      minHeight: '16em',
+      maxHeight: '70vh',
       overflow: 'scroll',
     },
     '.gridRow': {
