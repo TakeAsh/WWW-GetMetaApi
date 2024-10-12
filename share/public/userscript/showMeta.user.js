@@ -1,14 +1,14 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-10-01_22:00
+// @version      2024-10-12_12:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
 // @match        http://*.2chan.net/*/res/*
 // @match        https://tsumanne.net/*
 // @match        https://kako.futakuro.com/futa/*
-// @match        http://*.ftbucket.info/*/cont/*
+// @match        https://*.ftbucket.info/*/cont/*
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/Util.js
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/PrepareElement.js
 // @require      https://raw.githubusercontent.com/TakeAsh/js-Modules/main/modules/AutoSaveConfig.js
