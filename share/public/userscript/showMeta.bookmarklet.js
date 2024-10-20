@@ -12,9 +12,11 @@
     ],
   ];
   const loadScript = (src) => new Promise((resolve, reject) => {
+    const name = (/([^\/]+)$/.exec(src))[1];
     const script = d.createElement('script');
-    script.onload = () => { resolve((/([^\/]+)$/.exec(src))[1]); };
+    script.onload = () => { resolve(name); };
     script.onerror = reject;
+    script.type = name.endsWith('.mjs') ? 'module' : null;
     script.src = src;
     d.head.appendChild(script);
   });
