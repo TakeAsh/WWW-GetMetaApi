@@ -78,7 +78,7 @@ sub getMeta {
             next;
         }
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
-        if ( substr( $metas->{$uri}{'_image'}, 0, 1 ) eq '/'
+        if ( substr( $metas->{$uri}{'_image'} || '', 0, 1 ) eq '/'
             && $uri =~ /^(?<origin>https?:\/\/[^\/]+)/ )
         {
             $metas->{$uri}{'_image'} = $+{'origin'} . $metas->{$uri}{'_image'};
