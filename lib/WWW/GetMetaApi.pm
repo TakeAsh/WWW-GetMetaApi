@@ -77,6 +77,10 @@ sub getMeta {
             $metas->{$uri} = undef;
             next;
         }
+        if ( ( my $contentType = $response->header('Content-Type') ) =~ /charset=none/ ) {
+            $contentType =~ s/none/UTF-8/;
+            $response->header( 'Content-Type' => $contentType );
+        }
         $metas->{$uri} = getMetaFromContent( $response->decoded_content );
         if ( substr( $metas->{$uri}{'_image'} || '', 0, 1 ) eq '/'
             && $uri =~ /^(?<origin>https?:\/\/[^\/]+)/ )
