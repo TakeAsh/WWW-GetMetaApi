@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Show Meta data
 // @namespace    https://TakeAsh.net/
-// @version      2024-10-12_12:00
+// @version      2024-12-14_21:00
 // @description  show meta data for links
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -109,13 +109,7 @@
     },
   });
   addPanelSettings();
-  const target = getNodesByXpath('//div[@class = "thre" or @class = "text"]')[0]
-    || d.body;
-  checkLinks(target);
-  const observer = new MutationObserver(
-    (mutations) => mutations.forEach(
-      (mutation) => checkLinks(mutation.target)));
-  observer.observe(target, { childList: true, subtree: true, });
+  watchTarget(checkLinks, getNodesByXpath('//div[@class = "thre" or @class = "text"]')[0]);
 
   function addPanelSettings() {
     d.body.appendChild(prepareElement({
