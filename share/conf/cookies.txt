@@ -2,3 +2,4 @@ otonaStoreAgreed=1; Domain=bookwalker.jp; Path=/
 age_check_done=1; Domain=dmm.co.jp; Path=/
 adultchecked=1; Domain=dlsite.com; Path=/
 wants_mature_content=1; Domain=store.steampowered.com; Path=/
+AUTH_ADULT=1; Domain=www.melonbooks.co.jp; Path=/
