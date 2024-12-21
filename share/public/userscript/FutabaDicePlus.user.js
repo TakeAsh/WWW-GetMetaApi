@@ -1,7 +1,7 @@
 ﻿// ==UserScript==
 // @name         Futaba Dice Plus
 // @namespace    https://TakeAsh.net/
-// @version      2024-12-21_09:30
+// @version      2024-12-22_06:50
 // @description  try to take over the world!
 // @author       TakeAsh68k
 // @match        https://*.2chan.net/*/res/*
@@ -20,7 +20,6 @@
 
 (async (d) => {
   'use strict';
-  const regDice = /((?<name>[^>\n]+)(\s?|<br>))?dice(?<num>\d{1,2})d(?<faces>\d{1,4})=(?<results>(\d+\s)+)\((?<sum>\d+)\)/i;
   const shiftZenToHan = '0'.charCodeAt(0) - '０'.charCodeAt(0);
   const shiftHanToZen = '０'.charCodeAt(0) - '0'.charCodeAt(0);
   const shiftMaruSuji = '①'.charCodeAt(0) - 1;
@@ -340,6 +339,7 @@
   }
   function checkDice(node) {
     if (!node) { return; }
+    const regDice = new RegExp(`((?<name>${settings.Dices.names.join('|')})(\\s?|<br>))?dice(?<num>\\d{1,2})d(?<faces>\\d{1,4})=(?<results>(\\d+\\s)+)\\((?<sum>\\d+)\\)`, 'i');
     for (const comment of node.querySelectorAll('div[class="comment"], blockquote')) {
       if (comment.dataset.diceChecked) { continue; }
       comment.dataset.diceChecked = 1;
