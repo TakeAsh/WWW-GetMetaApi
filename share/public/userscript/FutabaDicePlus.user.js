@@ -352,7 +352,7 @@
         comment.innerHTML = diceSetting.replace(comment.innerHTML, results);
       } else {
         results.forEach((result) => {
-          const regResultRange = new RegExp(`(^|<br>| |　)(?<result>(?<min>[0-9０-９]+)[-.,ー．，～・](?<max>[0-9０-９]+)[ 　]?[^0-9<>][^<> 　]*)`, 'g');
+          const regResultRange = new RegExp(`(^|<br>| |　)(?<result>(?<min>[0-9０-９]+)[-,ー，～・](?<max>[0-9０-９]+)[ 　]?[^0-9<>][^<> 　]*)`, 'g');
           const regResult = new RegExp(`(^|<br>| |　)(?<result>(${result}|${HanToZen(result)}|${MaruSuji(result)})[ 　]?[^0-9<>][^<> 　]*)`, 'g');
           const numResult = parseInt(result);
           let m;
