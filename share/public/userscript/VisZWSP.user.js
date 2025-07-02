@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         VisZWSP
 // @namespace    https://TakeAsh.net/
-// @version      2025-07-02_11:31
+// @version      2025-07-02_21:00
 // @description  Visualize Zero Width Space
 // @author       TakeAsh
-// @match        https://*.2chan.net/b/res/*
+// @match        https://*.2chan.net/*/res/*
 // @match        https://tsumanne.net/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=2chan.net
 // @grant        none
