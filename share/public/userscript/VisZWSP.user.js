@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         VisZWSP
 // @namespace    https://TakeAsh.net/
-// @version      2025-07-02_11:30
+// @version      2025-07-02_11:31
 // @description  Visualize Zero Width Space
 // @author       TakeAsh
 // @match        https://*.2chan.net/b/res/*
@@ -26,7 +26,7 @@
         Array.from(target.querySelectorAll('td[class="rtd"], div[data-number]'))
             .forEach(comment => {
                 comment.innerHTML = comment.innerHTML.replace(
-                    /(\u200b|&#8203;|&#x200B;|&ZeroWidthSpace;)(?!\/)/giu,
+                    /(\u200b|&#8203;|&#x200B;|&ZeroWidthSpace;)(?![\/?&])/giu,
                     '<span class="ZWSP">ZWSP</span>'
                 );
             });
