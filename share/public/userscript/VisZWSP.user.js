@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         VisZWSP
 // @namespace    https://TakeAsh.net/
-// @version      2025-07-02_21:00
+// @version      2025-07-06_20:00
 // @description  Visualize Zero Width Space
 // @author       TakeAsh
 // @match        https://*.2chan.net/*/res/*
@@ -25,10 +25,13 @@
     function visualize(target) {
         Array.from(target.querySelectorAll('td[class="rtd"], div[data-number]'))
             .forEach(comment => {
-                comment.innerHTML = comment.innerHTML.replace(
+                const after = comment.innerHTML.replace(
                     /(\u200b|&#8203;|&#x200B;|&ZeroWidthSpace;)(?![\/?&])/giu,
                     '<span class="ZWSP">ZWSP</span>'
                 );
+                if (comment.innerHTML == after) { return; }
+                console.log({ before: comment.innerHTML, after: after });
+                comment.innerHTML = after;
             });
     }
 })(document);
