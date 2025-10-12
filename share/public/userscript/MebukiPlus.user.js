@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-13_01:00
+// @version      2025-10-13_06:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app/t/*
@@ -13,7 +13,7 @@
   'use strict';
   setTimeout(() => {
     const css = d.createElement('style');
-    css.textContent = '.custom-emoji:hover .custom-emoji-image { width: initial; height: 128px; position: relative; z-index: 10; }';
+    css.textContent = '.custom-emoji:hover .custom-emoji-image { width: initial; height: 6em; position: relative; z-index: 10; }';
     d.head.appendChild(css);
   }, 2000);
 })(window, document);
