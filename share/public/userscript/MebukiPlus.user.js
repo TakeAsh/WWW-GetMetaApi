@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-19_16:00
+// @version      2025-10-19_19:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -60,11 +60,11 @@
       return;
     }
     const modify = (target) => {
-      Array.from(target.querySelectorAll('.text-sm'))
+      Array.from(target.querySelectorAll('.catalog-item'))
         .filter(elm => !elm.dataset.mod)
         .forEach(elm => {
           elm.dataset.mod = 1;
-          elm.title = elm.textContent;
+          elm.title = elm.querySelector('.text-sm').textContent;
         });
     };
     modify(target);
