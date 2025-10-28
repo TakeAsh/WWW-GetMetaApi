@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-29_03:00
+// @version      2025-10-29_03:01
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -37,9 +37,6 @@
   const emojis = await getEmojis();
   await sleep(2000);
   addStyle({
-    '.zorome': {
-      color: '#ff0000', fontSize: '125%',
-    },
     '#MebukiPlus_Main': {
       marginBottom: 'auto',
     },
@@ -78,6 +75,13 @@
       },
       '.custom-emoji:hover > .custom-emoji-image': {
         width: 'initial', height: '6em', position: 'relative', zIndex: 10,
+      },
+    });
+  }
+  if (settings.ZoromePicker) {
+    addStyle({
+      '.zorome': {
+        color: '#ff0000', fontSize: '125%',
       },
     });
   }
