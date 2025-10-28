@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-26_00:00
+// @version      2025-10-29_03:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -18,6 +18,8 @@
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
   const urlEmoji = 'https://mebuki.moe/assets/emoji-data-CJuCqmpZ.js';
   const settings = new AutoSaveConfig({
+    PopupCatalog: true,
+    PopupEmoji: true,
     ZoromePicker: true,
     Dice: {
       RGB: true,
@@ -35,21 +37,6 @@
   const emojis = await getEmojis();
   await sleep(2000);
   addStyle({
-    '.custom-emoji': {
-      pointerEvents: 'auto',
-    },
-    '.custom-emoji:hover > .custom-emoji-image': {
-      width: 'initial', height: '6em', position: 'relative', zIndex: 10,
-    },
-    '.catalog-item:hover': {
-      transform: 'translate(50%,50%) translate(-6em,-6em)', zIndex: 20,
-    },
-    '.catalog-image': {
-      position: 'relative',
-    },
-    '.catalog-image:hover': {
-      width: 'initial', height: '12em', position: 'absolute', zIndex: 20,
-    },
     '.zorome': {
       color: '#ff0000', fontSize: '125%',
     },
@@ -71,6 +58,29 @@
       display: 'grid',
     },
   });
+  if (settings.PopupCatalog) {
+    addStyle({
+      '.catalog-item:hover': {
+        transform: 'translate(50%,50%) translate(-6em,-6em)', zIndex: 20,
+      },
+      '.catalog-image': {
+        position: 'relative',
+      },
+      '.catalog-image:hover': {
+        width: 'initial', height: '12em', position: 'absolute', zIndex: 20,
+      },
+    });
+  }
+  if (settings.PopupEmoji) {
+    addStyle({
+      '.custom-emoji': {
+        pointerEvents: 'auto',
+      },
+      '.custom-emoji:hover > .custom-emoji-image': {
+        width: 'initial', height: '6em', position: 'relative', zIndex: 10,
+      },
+    });
+  }
   watch();
 
   async function getEmojis() {
@@ -116,6 +126,56 @@
                 tag: 'div',
                 id: 'MebukiPlus_Body',
                 children: [
+                  {
+                    tag: 'fieldset',
+                    children: [
+                      {
+                        tag: 'legend',
+                        textContent: 'ポップアップ',
+                      },
+                      {
+                        tag: 'div',
+                        children: [
+                          {
+                            tag: 'label',
+                            children: [
+                              {
+                                tag: 'input',
+                                type: 'checkbox',
+                                name: 'PopupCatalog',
+                                checked: settings.PopupCatalog,
+                                events: {
+                                  change: (ev) => { settings.PopupCatalog = ev.currentTarget.checked; },
+                                },
+                              },
+                              {
+                                tag: 'span',
+                                textContent: 'カタログ',
+                              },
+                            ],
+                          },
+                          {
+                            tag: 'label',
+                            children: [
+                              {
+                                tag: 'input',
+                                type: 'checkbox',
+                                name: 'PopupEmoji',
+                                checked: settings.PopupEmoji,
+                                events: {
+                                  change: (ev) => { settings.PopupEmoji = ev.currentTarget.checked; },
+                                },
+                              },
+                              {
+                                tag: 'span',
+                                textContent: '絵文字',
+                              },
+                            ],
+                          },
+                        ],
+                      }
+                    ],
+                  },
                   {
                     tag: 'fieldset',
                     children: [
@@ -189,22 +249,26 @@
       }
       // Catalog
       // Thread thumbnail popup
-      Array.from(target.querySelectorAll('.catalog-item'))
-        .filter(elm => !elm.dataset.checkThreadThumbnail)
-        .forEach(elm => {
-          elm.dataset.checkThreadThumbnail = 1;
-          elm.title = elm.querySelector('.text-sm').textContent;
-        });
+      if (settings.PopupCatalog) {
+        Array.from(target.querySelectorAll('.catalog-item'))
+          .filter(elm => !elm.dataset.checkThreadThumbnail)
+          .forEach(elm => {
+            elm.dataset.checkThreadThumbnail = 1;
+            elm.title = elm.querySelector('.text-sm').textContent;
+          });
+      }
 
       // Thread
       // Emoji popup
-      Array.from(target.querySelectorAll('.custom-emoji-image'))
-        .filter(elm => !elm.dataset.checkEmoji)
-        .forEach(elm => {
-          elm.dataset.checkEmoji = 1;
-          const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
-          elm.title = emojis[key] || key;
-        });
+      if (settings.PopupEmoji) {
+        Array.from(target.querySelectorAll('.custom-emoji-image'))
+          .filter(elm => !elm.dataset.checkEmoji)
+          .forEach(elm => {
+            elm.dataset.checkEmoji = 1;
+            const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
+            elm.title = emojis[key] || key;
+          });
+      }
       // Zorome picker
       if (settings.ZoromePicker) {
         Array.from(target.querySelectorAll('.text-sm > .text-xs'))
