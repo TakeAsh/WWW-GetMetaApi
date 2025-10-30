@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-29_03:01
+// @version      2025-10-30_22:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -20,6 +20,7 @@
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
+    ThreadThumbnail: true,
     ZoromePicker: true,
     Dice: {
       RGB: true,
@@ -75,6 +76,17 @@
       },
       '.custom-emoji:hover > .custom-emoji-image': {
         width: 'initial', height: '6em', position: 'relative', zIndex: 10,
+      },
+    });
+  }
+  if (settings.ThreadThumbnail) {
+    addStyle({
+      '#MebukiPlus_ThreadThumbnail': {
+        marginBottom: 'auto',
+        height: '3em',
+      },
+      '#MebukiPlus_ThreadThumbnail:hover': {
+        height: '12em',
       },
     });
   }
@@ -185,6 +197,38 @@
                     children: [
                       {
                         tag: 'legend',
+                        textContent: 'スレッド',
+                      },
+                      {
+                        tag: 'div',
+                        children: [
+                          {
+                            tag: 'label',
+                            children: [
+                              {
+                                tag: 'input',
+                                type: 'checkbox',
+                                name: 'ThreadThumbnail',
+                                checked: settings.ThreadThumbnail,
+                                events: {
+                                  change: (ev) => { settings.ThreadThumbnail = ev.currentTarget.checked; },
+                                },
+                              },
+                              {
+                                tag: 'span',
+                                textContent: 'サムネイル',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    tag: 'fieldset',
+                    children: [
+                      {
+                        tag: 'legend',
                         textContent: 'ゾロ目',
                       },
                       {
@@ -209,7 +253,7 @@
                             ],
                           },
                         ],
-                      }
+                      },
                     ],
                   },
                   {
@@ -240,7 +284,6 @@
                               },
                             ],
                           },
-
                         ],
                       },
                     ],
@@ -263,6 +306,29 @@
       }
 
       // Thread
+      // ThreadThumbnail
+      if (settings.ThreadThumbnail) {
+        const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
+        const elmMessageContainer = d.body.querySelector('li[class*="message-container"]');
+        if (elmMessageContainer) {
+          // Thread
+          const elmAPspwItem = elmMessageContainer.querySelector('a[class="pspw-item"]');
+          if (!header.querySelector('#MebukiPlus_ThreadThumbnail') && elmAPspwItem) {
+            header.insertBefore(
+              prepareElement({
+                tag: 'img',
+                id: 'MebukiPlus_ThreadThumbnail',
+                src: elmAPspwItem.href,
+              }),
+              header.firstElementChild
+            );
+            elmLinkIcon.href = elmAPspwItem.href;
+          }
+        } else {
+          // Catalog
+          elmLinkIcon.href = '/favicon.ico';
+        }
+      }
       // Emoji popup
       if (settings.PopupEmoji) {
         Array.from(target.querySelectorAll('.custom-emoji-image'))
