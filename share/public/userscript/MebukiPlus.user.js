@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-31_20:00
+// @version      2025-11-01_05:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -17,6 +17,7 @@
   'use strict';
   const urlCustomEmoji = 'https://mebuki.moe/api/custom-emoji';
   const urlEmoji = 'https://mebuki.moe/assets/emoji-data-CJuCqmpZ.js';
+  const urlFavion = '/favicon.ico';
   const settings = new AutoSaveConfig({
     PopupCatalog: true,
     PopupEmoji: true,
@@ -97,7 +98,7 @@
       },
     });
   }
-  watch();
+  watchTarget(modify, d.body);
 
   async function getEmojis() {
     const resCustomEmoji = await fetch(urlCustomEmoji);
@@ -121,168 +122,180 @@
     );
     return emojis;
   }
-  function watch() {
-    const modify = (target) => {
-      // Panel
-      const header = d.body.querySelector('main > header > div');
-      if (!header.querySelector('#MebukiPlus_Main')) {
-        header.appendChild(prepareElement({
-          tag: 'div',
-          id: 'MebukiPlus_Main',
-          children: [{
-            tag: 'details',
+  function modify(target) {
+    const header = d.body.querySelector('main > header > div');
+    addPanel(header);
+    const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
+    const elmMessageContainer = d.body.querySelector('li[class*="message-container"]');
+    if (elmMessageContainer) {
+      // Thread
+      elmLinkIcon.href = addThreadThumbnail(header, elmMessageContainer) || urlFavion;
+      addEmojiTitlePopup(target);
+      pickupZorome(target);
+      modifyDice(target);
+    } else {
+      // Catalog
+      elmLinkIcon.href = urlFavion;
+      addThreadTitlePopup(target);
+    }
+  }
+  function addPanel(header) {
+    if (header.querySelector('#MebukiPlus_Main')) { return; }
+    header.appendChild(prepareElement({
+      tag: 'div',
+      id: 'MebukiPlus_Main',
+      children: [{
+        tag: 'details',
+        children: [
+          {
+            tag: 'summary',
+            id: 'MebukiPlus_Summary',
+            innerHTML: '&#x1f331;+',
+            title: 'Mebuki Plus',
+          },
+          {
+            tag: 'div',
+            id: 'MebukiPlus_Body',
             children: [
               {
-                tag: 'summary',
-                id: 'MebukiPlus_Summary',
-                innerHTML: '&#x1f331;+',
-                title: 'Mebuki Plus',
-              },
-              {
-                tag: 'div',
-                id: 'MebukiPlus_Body',
+                tag: 'fieldset',
                 children: [
                   {
-                    tag: 'fieldset',
-                    children: [
-                      {
-                        tag: 'legend',
-                        textContent: 'ポップアップ',
-                      },
-                      {
-                        tag: 'div',
-                        children: [
-                          {
-                            tag: 'label',
-                            children: [
-                              {
-                                tag: 'input',
-                                type: 'checkbox',
-                                name: 'PopupCatalog',
-                                checked: settings.PopupCatalog,
-                                events: {
-                                  change: (ev) => { settings.PopupCatalog = ev.currentTarget.checked; },
-                                },
-                              },
-                              {
-                                tag: 'span',
-                                textContent: 'カタログ',
-                              },
-                            ],
-                          },
-                          {
-                            tag: 'label',
-                            children: [
-                              {
-                                tag: 'input',
-                                type: 'checkbox',
-                                name: 'PopupEmoji',
-                                checked: settings.PopupEmoji,
-                                events: {
-                                  change: (ev) => { settings.PopupEmoji = ev.currentTarget.checked; },
-                                },
-                              },
-                              {
-                                tag: 'span',
-                                textContent: '絵文字',
-                              },
-                            ],
-                          },
-                        ],
-                      }
-                    ],
+                    tag: 'legend',
+                    textContent: 'ポップアップ',
                   },
                   {
-                    tag: 'fieldset',
+                    tag: 'div',
                     children: [
                       {
-                        tag: 'legend',
-                        textContent: 'スレッド',
-                      },
-                      {
-                        tag: 'div',
+                        tag: 'label',
                         children: [
                           {
-                            tag: 'label',
-                            children: [
-                              {
-                                tag: 'input',
-                                type: 'checkbox',
-                                name: 'ThreadThumbnail',
-                                checked: settings.ThreadThumbnail,
-                                events: {
-                                  change: (ev) => { settings.ThreadThumbnail = ev.currentTarget.checked; },
-                                },
-                              },
-                              {
-                                tag: 'span',
-                                textContent: 'サムネイル',
-                              },
-                            ],
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'PopupCatalog',
+                            checked: settings.PopupCatalog,
+                            events: {
+                              change: (ev) => { settings.PopupCatalog = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'カタログ',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'PopupEmoji',
+                            checked: settings.PopupEmoji,
+                            events: {
+                              change: (ev) => { settings.PopupEmoji = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: '絵文字',
+                          },
+                        ],
+                      },
+                    ],
+                  }
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
+                  {
+                    tag: 'legend',
+                    textContent: 'スレッド',
+                  },
+                  {
+                    tag: 'div',
+                    children: [
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'ThreadThumbnail',
+                            checked: settings.ThreadThumbnail,
+                            events: {
+                              change: (ev) => { settings.ThreadThumbnail = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'サムネイル',
                           },
                         ],
                       },
                     ],
                   },
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
                   {
-                    tag: 'fieldset',
+                    tag: 'legend',
+                    textContent: 'ゾロ目',
+                  },
+                  {
+                    tag: 'div',
                     children: [
                       {
-                        tag: 'legend',
-                        textContent: 'ゾロ目',
-                      },
-                      {
-                        tag: 'div',
+                        tag: 'label',
                         children: [
                           {
-                            tag: 'label',
-                            children: [
-                              {
-                                tag: 'input',
-                                type: 'checkbox',
-                                name: 'ZoromePicker',
-                                checked: settings.ZoromePicker,
-                                events: {
-                                  change: (ev) => { settings.ZoromePicker = ev.currentTarget.checked; },
-                                },
-                              },
-                              {
-                                tag: 'span',
-                                textContent: 'ピックアップ',
-                              },
-                            ],
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'ZoromePicker',
+                            checked: settings.ZoromePicker,
+                            events: {
+                              change: (ev) => { settings.ZoromePicker = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'ピックアップ',
                           },
                         ],
                       },
                     ],
                   },
+                ],
+              },
+              {
+                tag: 'fieldset',
+                children: [
                   {
-                    tag: 'fieldset',
+                    tag: 'legend',
+                    textContent: 'ダイス',
+                  },
+                  {
+                    tag: 'div',
                     children: [
                       {
-                        tag: 'legend',
-                        textContent: 'ダイス',
-                      },
-                      {
-                        tag: 'div',
+                        tag: 'label',
                         children: [
                           {
-                            tag: 'label',
-                            children: [
-                              {
-                                tag: 'input',
-                                type: 'checkbox',
-                                name: 'DiceRGB',
-                                checked: settings.Dice.RGB,
-                                events: {
-                                  change: (ev) => { settings.Dice.RGB = ev.currentTarget.checked; },
-                                },
-                              },
-                              {
-                                tag: 'span',
-                                textContent: 'RGB',
-                              },
-                            ],
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DiceRGB',
+                            checked: settings.Dice.RGB,
+                            events: {
+                              change: (ev) => { settings.Dice.RGB = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'RGB',
                           },
                         ],
                       },
@@ -291,86 +304,73 @@
                 ],
               },
             ],
-          }],
-        }));
-      }
-      // Catalog
-      // Thread thumbnail popup
-      if (settings.PopupCatalog) {
-        Array.from(target.querySelectorAll('.catalog-item'))
-          .filter(elm => !elm.dataset.checkThreadThumbnail)
-          .forEach(elm => {
-            elm.dataset.checkThreadThumbnail = 1;
-            elm.title = elm.querySelector('.text-sm').textContent;
-          });
-      }
-
-      // Thread
-      // ThreadThumbnail
-      if (settings.ThreadThumbnail) {
-        const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
-        const elmMessageContainer = d.body.querySelector('li[class*="message-container"]');
-        if (elmMessageContainer) {
-          // Thread
-          const elmAPspwItem = elmMessageContainer.querySelector('a[class="pspw-item"]');
-          let elmThreadThumbnail = header.querySelector('#MebukiPlus_ThreadThumbnail');
-          if (!elmThreadThumbnail) {
-            elmThreadThumbnail = prepareElement({
-              tag: 'img',
-              id: 'MebukiPlus_ThreadThumbnail',
-            });
-            header.insertBefore(elmThreadThumbnail, header.firstElementChild);
-          }
-          elmThreadThumbnail.src = elmLinkIcon.href = elmAPspwItem.href;
-        } else {
-          // Catalog
-          elmLinkIcon.href = '/favicon.ico';
+          },
+        ],
+      }],
+    }));
+  }
+  function addThreadTitlePopup(target) {
+    if (!settings.PopupCatalog) { return; }
+    Array.from(target.querySelectorAll('.catalog-item'))
+      .filter(elm => !elm.dataset.checkThreadThumbnail)
+      .forEach(elm => {
+        elm.dataset.checkThreadThumbnail = 1;
+        elm.title = elm.querySelector('.text-sm').textContent;
+      });
+  }
+  function addThreadThumbnail(header, elmMessageContainer) {
+    if (!settings.ThreadThumbnail) { return; }
+    const elmAPspwItem = elmMessageContainer.querySelector('a[class="pspw-item"]');
+    let elmThreadThumbnail = header.querySelector('#MebukiPlus_ThreadThumbnail');
+    if (!elmThreadThumbnail) {
+      elmThreadThumbnail = prepareElement({
+        tag: 'img',
+        id: 'MebukiPlus_ThreadThumbnail',
+      });
+      header.insertBefore(elmThreadThumbnail, header.firstElementChild);
+    }
+    return elmThreadThumbnail.src = elmAPspwItem?.href || urlFavion;
+  }
+  function addEmojiTitlePopup(target) {
+    if (!settings.PopupEmoji) { return; }
+    Array.from(target.querySelectorAll('.custom-emoji-image'))
+      .filter(elm => !elm.dataset.checkEmoji)
+      .forEach(elm => {
+        elm.dataset.checkEmoji = 1;
+        const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
+        elm.title = emojis[key] || key;
+      });
+  }
+  function pickupZorome(target) {
+    if (!settings.ZoromePicker) { return; }
+    Array.from(target.querySelectorAll('.text-sm > .text-xs'))
+      .filter(elm => !elm.dataset.checkZorome)
+      .forEach(elm => {
+        elm.dataset.checkZorome = 1;
+        const after = elm.innerHTML.replace(
+          /(\.\d*?)((\d)\3+)$/,
+          '$1<span class="zorome">$2</span>'
+        );
+        if (elm.innerHTML != after) {
+          elm.innerHTML = after;
         }
-      }
-      // Emoji popup
-      if (settings.PopupEmoji) {
-        Array.from(target.querySelectorAll('.custom-emoji-image'))
-          .filter(elm => !elm.dataset.checkEmoji)
-          .forEach(elm => {
-            elm.dataset.checkEmoji = 1;
-            const key = elm.src.replace(/^[\s\S]+\/([^\/\.]+)\.\w+$/, '$1');
-            elm.title = emojis[key] || key;
-          });
-      }
-      // Zorome picker
-      if (settings.ZoromePicker) {
-        Array.from(target.querySelectorAll('.text-sm > .text-xs'))
-          .filter(elm => !elm.dataset.checkZorome)
-          .forEach(elm => {
-            elm.dataset.checkZorome = 1;
-            const after = elm.innerHTML.replace(
-              /(\.\d*?)((\d)\3+)$/,
-              '$1<span class="zorome">$2</span>'
-            );
-            if (elm.innerHTML != after) {
-              elm.innerHTML = after;
+      });
+  }
+  function modifyDice(target) {
+    const keysDice = Object.keys(settings.Dice);
+    if (keysDice.every(key => !settings.Dice[key])) { return; }
+    Array.from(target.querySelectorAll('.message-content'))
+      .filter(elm => !elm.dataset.checkDice)
+      .forEach(elm => {
+        elm.dataset.checkDice = 1;
+        let m;
+        keysDice.filter(key => settings.Dice[key])
+          .forEach(key => {
+            const dice = Dice[key];
+            while (m = dice.Reg.exec(elm.innerHTML)) {
+              elm.innerHTML = dice.Replace(m, elm.innerHTML);
             }
           });
-      }
-      // Dice
-      // RGB
-      if (Object.keys(settings.Dice).some(key => settings.Dice[key])) {
-        Array.from(target.querySelectorAll('.message-content'))
-          .filter(elm => !elm.dataset.checkDice)
-          .forEach(elm => {
-            elm.dataset.checkDice = 1;
-            let m;
-            Object.keys(settings.Dice)
-              .filter(key => settings.Dice[key])
-              .forEach(key => {
-                const dice = Dice[key];
-                while (m = dice.Reg.exec(elm.innerHTML)) {
-                  elm.innerHTML = dice.Replace(m, elm.innerHTML);
-                }
-              });
-          });
-      }
-    };
-    watchTarget(modify, d.body);
+      });
   }
 })(window, document);
