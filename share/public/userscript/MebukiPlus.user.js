@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-10-30_22:00
+// @version      2025-10-31_20:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -313,17 +313,15 @@
         if (elmMessageContainer) {
           // Thread
           const elmAPspwItem = elmMessageContainer.querySelector('a[class="pspw-item"]');
-          if (!header.querySelector('#MebukiPlus_ThreadThumbnail') && elmAPspwItem) {
-            header.insertBefore(
-              prepareElement({
-                tag: 'img',
-                id: 'MebukiPlus_ThreadThumbnail',
-                src: elmAPspwItem.href,
-              }),
-              header.firstElementChild
-            );
-            elmLinkIcon.href = elmAPspwItem.href;
+          let elmThreadThumbnail = header.querySelector('#MebukiPlus_ThreadThumbnail');
+          if (!elmThreadThumbnail) {
+            elmThreadThumbnail = prepareElement({
+              tag: 'img',
+              id: 'MebukiPlus_ThreadThumbnail',
+            });
+            header.insertBefore(elmThreadThumbnail, header.firstElementChild);
           }
+          elmThreadThumbnail.src = elmLinkIcon.href = elmAPspwItem.href;
         } else {
           // Catalog
           elmLinkIcon.href = '/favicon.ico';
