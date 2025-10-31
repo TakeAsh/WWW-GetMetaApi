@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-01_05:00
+// @version      2025-11-01_05:01
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -31,8 +31,8 @@
     RGB: {
       Reg: /(?<dice>RGB値?[\s\S]+?dice3d255=[\s\S]*?>(?<r>\d+)\s(?<g>\d+)\s(?<b>\d+)\s\(\d+\)<[^>]+>)/giu,
       Replace: (m, html) => html.replace(
-        m.groups['dice'],
-        `${m.groups['dice']} <span style="background-color: rgb(${m.groups['r']},${m.groups['g']},${m.groups['b']});">　　　</span>`
+        m.groups.dice,
+        `${m.groups.dice} <span style="background-color: rgb(${m.groups.r},${m.groups.g},${m.groups.b});">　　　</span>`
       ),
     },
   };
@@ -329,7 +329,7 @@
       });
       header.insertBefore(elmThreadThumbnail, header.firstElementChild);
     }
-    return elmThreadThumbnail.src = elmAPspwItem?.href || urlFavion;
+    return (elmThreadThumbnail.src = (elmAPspwItem?.href || urlFavion));
   }
   function addEmojiTitlePopup(target) {
     if (!settings.PopupEmoji) { return; }
