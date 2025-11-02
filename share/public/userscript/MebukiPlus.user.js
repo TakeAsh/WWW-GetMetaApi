@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-01_05:01
+// @version      2025-11-02_20:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -22,6 +22,7 @@
     PopupCatalog: true,
     PopupEmoji: true,
     ThreadThumbnail: true,
+    DropTime: true,
     ZoromePicker: true,
     Dice: {
       RGB: true,
@@ -55,6 +56,9 @@
     },
     '#MebukiPlus_Body > fieldset > div': {
       display: 'grid',
+    },
+    '.MebukiPlus_Highlight': {
+      color: '#ff0000', fontSize: '125%',
     },
   });
   if (settings.PopupCatalog) {
@@ -91,10 +95,11 @@
       },
     });
   }
-  if (settings.ZoromePicker) {
+  if (settings.DropTime) {
     addStyle({
-      '.zorome': {
-        color: '#ff0000', fontSize: '125%',
+      '#MebukiPlus_DropTime': {
+        color: 'var(--muted-foreground)',
+        fontSize: 'var(--text-xs)',
       },
     });
   }
@@ -126,10 +131,11 @@
     const header = d.body.querySelector('main > header > div');
     addPanel(header);
     const elmLinkIcon = d.head.querySelector('link[rel="icon"]');
-    const elmMessageContainer = d.body.querySelector('li[class*="message-container"]');
+    const elmMessageContainer = d.body.querySelector('.message-container');
     if (elmMessageContainer) {
       // Thread
       elmLinkIcon.href = addThreadThumbnail(header, elmMessageContainer) || urlFavion;
+      showDropTime(header, target);
       addEmojiTitlePopup(target);
       pickupZorome(target);
       modifyDice(target);
@@ -140,7 +146,7 @@
     }
   }
   function addPanel(header) {
-    if (header.querySelector('#MebukiPlus_Main')) { return; }
+    if (!header || header.querySelector('#MebukiPlus_Main')) { return; }
     header.appendChild(prepareElement({
       tag: 'div',
       id: 'MebukiPlus_Main',
@@ -232,6 +238,24 @@
                           {
                             tag: 'span',
                             textContent: 'サムネイル',
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DropTime',
+                            checked: settings.DropTime,
+                            events: {
+                              change: (ev) => { settings.DropTime = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: '落ち',
                           },
                         ],
                       },
@@ -331,6 +355,66 @@
     }
     return (elmThreadThumbnail.src = (elmAPspwItem?.href || urlFavion));
   }
+  function showDropTime(header, target) {
+    if (!settings.DropTime) { return; }
+    const elmDropTimeSrc = d.querySelector('main > main > div:last-child > span');
+    if (!elmDropTimeSrc) { return; }
+    let elmDropTimeDst = header.querySelector('#MebukiPlus_DropTime');
+    if (!elmDropTimeDst) {
+      elmDropTimeDst = prepareElement({
+        tag: 'span',
+        id: 'MebukiPlus_DropTime',
+        children: [
+          {
+            tag: 'span',
+            textContent: ' 落ち:',
+          },
+          {
+            tag: 'span',
+            id: 'MebukiPlus_DropTime_Time',
+            textContent: '--/-- --:--',
+          },
+          {
+            tag: 'span',
+            textContent: ' レス:',
+          },
+          {
+            tag: 'span',
+            id: 'MebukiPlus_DropTime_Res',
+            textContent: '0',
+          },
+        ],
+      });
+      header.querySelector('div[class*="md:justify-start"]').appendChild(elmDropTimeDst);
+    }
+    const elmDropTimeTime = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Time');
+    const m = /\((?<mon>\d+)月(?<day>\d+)日\s(?<hour>\d+):(?<min>\d+)\)/u.exec(elmDropTimeSrc.textContent);
+    if (m) {
+      const now = new Date();
+      const timeDrop = new Date(`${now.getFullYear() + (now.getMonth() > parseInt(m.groups.mon) ? 1 : 0)}-${m.groups.mon}-${m.groups.day} ${m.groups.hour}:${m.groups.min}`);
+      const strDrop = timeDrop.toLocaleString('ja-jp', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', });
+      if (elmDropTimeTime.textContent != strDrop) {
+        elmDropTimeTime.textContent = strDrop;
+        if (timeDrop - now < 30 * 60 * 1000) {
+          elmDropTimeTime.classList.add('MebukiPlus_Highlight');
+        }
+      }
+    }
+    const elmDropTimeRes = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Res');
+    const elmLastRes = Array.from(target.querySelectorAll('.message-container')).pop();
+    if (elmLastRes) {
+      const elmLastResNo = elmLastRes.querySelector('.text-destructive');
+      if (elmLastResNo) {
+        const lastRes = parseInt(elmLastResNo.textContent);
+        if (elmDropTimeRes.textContent != lastRes) {
+          elmDropTimeRes.textContent = lastRes;
+          if (lastRes >= 950) {
+            elmDropTimeRes.classList.add('MebukiPlus_Highlight');
+          }
+        }
+      }
+    }
+  }
   function addEmojiTitlePopup(target) {
     if (!settings.PopupEmoji) { return; }
     Array.from(target.querySelectorAll('.custom-emoji-image'))
@@ -349,7 +433,7 @@
         elm.dataset.checkZorome = 1;
         const after = elm.innerHTML.replace(
           /(\.\d*?)((\d)\3+)$/,
-          '$1<span class="zorome">$2</span>'
+          '$1<span class="MebukiPlus_Highlight">$2</span>'
         );
         if (elm.innerHTML != after) {
           elm.innerHTML = after;
