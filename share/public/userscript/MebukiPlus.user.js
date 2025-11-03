@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-03_00:00
+// @version      2025-11-03_19:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -26,15 +26,27 @@
     ZoromePicker: true,
     Dice: {
       RGB: true,
+      Candidate: true,
     },
   }, 'MebukiPlusSettings');
   const Dice = {
     RGB: {
       Reg: /(?<dice>RGB値?[\s\S]+?dice3d255=[\s\S]*?>(?<r>\d+)\s(?<g>\d+)\s(?<b>\d+)\s\(\d+\)<[^>]+>)/giu,
-      Replace: (m, html) => html.replace(
-        m.groups.dice,
-        `${m.groups.dice} <span style="background-color: rgb(${m.groups.r},${m.groups.g},${m.groups.b});">　　　</span>`
-      ),
+      Callback: (match, p1, p2, p3, p4) => `${p1} <span style="background-color: rgb(${p2},${p3},${p4});">　　　</span>`,
+    },
+    Candidate: {
+      Reg: /(?<head>[\s\S]+?)(?<dice><span\sclass="message-dice"><span\sclass="formula">dice(?<num>\d+)d(?<faces>\d+)=<\/span><span\sclass="answer">(?<answers>(\d+\s)+)\(\d+\)<\/span><\/span>)/g,
+      Callback: (match, p1, p2, p3, p4, p5) => {
+        p5.trim().split(/\s+/)
+          .map(answer => parseInt(answer))
+          .forEach(answer => {
+            p1 = p1.replace(
+              new RegExp(`(?<=<br>|\\s|\\b)(${answer}\\D[^0-9<]+)`, 'u'),
+              '<span class="MebukiPlus_DiceHighlight">$1</span>'
+            );
+          });
+        return `${p1}${p2}`;
+      },
     },
   };
   const emojis = await getEmojis();
@@ -59,6 +71,9 @@
     },
     '.MebukiPlus_Highlight': {
       color: '#ff0000', fontSize: '125%',
+    },
+    '.MebukiPlus_DiceHighlight': {
+      backgroundColor: '#a0ffa0',
     },
   });
   if (settings.PopupCatalog) {
@@ -323,6 +338,24 @@
                           },
                         ],
                       },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DiceCandidate',
+                            checked: settings.Dice.Candidate,
+                            events: {
+                              change: (ev) => { settings.Dice.Candidate = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: '候補',
+                          },
+                        ],
+                      },
                     ],
                   },
                 ],
@@ -450,9 +483,9 @@
         let m;
         keysDice.filter(key => settings.Dice[key])
           .forEach(key => {
-            const dice = Dice[key];
-            while (m = dice.Reg.exec(elm.innerHTML)) {
-              elm.innerHTML = dice.Replace(m, elm.innerHTML);
+            const after = elm.innerHTML.replace(Dice[key].Reg, Dice[key].Callback);
+            if (elm.innerHTML != after) {
+              elm.innerHTML = after;
             }
           });
       });
