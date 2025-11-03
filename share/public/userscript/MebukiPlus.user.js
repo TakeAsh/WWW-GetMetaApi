@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-03_19:30
+// @version      2025-11-03_21:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -24,6 +24,7 @@
     ThreadThumbnail: true,
     DropTime: true,
     ZoromePicker: true,
+    DiceHighlight: '#a0ffa0',
     Dice: {
       RGB: true,
       Candidate: true,
@@ -51,6 +52,9 @@
   };
   const emojis = await getEmojis();
   await sleep(2000);
+  const cssDiceHighlight = d.createElement('style');
+  d.head.appendChild(cssDiceHighlight);
+  setDiceHighlight(settings.DiceHighlight);
   addStyle({
     '#MebukiPlus_Main': {
       marginBottom: 'auto',
@@ -71,9 +75,6 @@
     },
     '.MebukiPlus_Highlight': {
       color: '#ff0000', fontSize: '125%',
-    },
-    '.MebukiPlus_DiceHighlight': {
-      backgroundColor: '#a0ffa0',
     },
   });
   if (settings.PopupCatalog) {
@@ -141,6 +142,10 @@
       customEmojis
     );
     return emojis;
+  }
+  function setDiceHighlight(color) {
+    cssDiceHighlight.textContent =
+      `.MebukiPlus_DiceHighlight { background-color: ${color}; }`;
   }
   function modify(target) {
     const header = d.body.querySelector('main > header > div');
@@ -353,6 +358,16 @@
                           {
                             tag: 'span',
                             textContent: '候補',
+                          },
+                          {
+                            tag: 'input',
+                            type: 'color',
+                            value: settings.DiceHighlight,
+                            events: {
+                              input: (ev) => {
+                                setDiceHighlight(settings.DiceHighlight = ev.currentTarget.value);
+                              },
+                            },
                           },
                         ],
                       },
