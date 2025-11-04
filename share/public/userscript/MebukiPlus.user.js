@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-05_00:00
+// @version      2025-11-05_01:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -28,6 +28,7 @@
     Dice: {
       RGB: true,
       Candidate: true,
+      Onigiri: true,
     },
   }, 'MebukiPlusSettings');
   const Dice = {
@@ -59,6 +60,10 @@
           });
         return `${p1}${p2}`;
       },
+    },
+    Onigiri: {
+      Reg: /(?<dice>おにぎり[\s\S]+?dice1d100=[\s\S]*?>(?<answer>\d+)\s\(\d+\)<[^>]+>)/giu,
+      Callback: (match, p1, p2) => `${p1} <span class="MebukiPlus_DiceHighlight">${p2 ** 2}</span>個`,
     },
   };
   const emojis = await getEmojis();
@@ -379,6 +384,24 @@
                                 setDiceHighlight(settings.DiceHighlight = ev.currentTarget.value);
                               },
                             },
+                          },
+                        ],
+                      },
+                      {
+                        tag: 'label',
+                        children: [
+                          {
+                            tag: 'input',
+                            type: 'checkbox',
+                            name: 'DiceOnigiri',
+                            checked: settings.Dice.Onigiri,
+                            events: {
+                              change: (ev) => { settings.Dice.Onigiri = ev.currentTarget.checked; },
+                            },
+                          },
+                          {
+                            tag: 'span',
+                            textContent: 'おにぎり',
                           },
                         ],
                       },
