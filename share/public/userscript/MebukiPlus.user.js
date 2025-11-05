@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-05_01:00
+// @version      2025-11-05_21:50
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -132,6 +132,7 @@
       '#MebukiPlus_DropTime': {
         color: 'var(--muted-foreground)',
         fontSize: 'var(--text-xs)',
+        marginBottom: 'auto',
       },
     });
   }
@@ -183,6 +184,10 @@
   }
   function addPanel(header) {
     if (!header || header.querySelector('#MebukiPlus_Main')) { return; }
+    const divLast = header.querySelector(':scope > div:last-child');
+    if (divLast.children.length == 0) {
+      divLast.style.display = 'none';
+    }
     header.appendChild(prepareElement({
       tag: 'div',
       id: 'MebukiPlus_Main',
@@ -449,20 +454,18 @@
         children: [
           {
             tag: 'span',
-            textContent: ' 落ち:',
-          },
-          {
-            tag: 'span',
             id: 'MebukiPlus_DropTime_Time',
+            title: 'スレ落ち時刻',
             textContent: '--/-- --:--',
           },
           {
             tag: 'span',
-            textContent: ' レス:',
+            textContent: ' ',
           },
           {
             tag: 'span',
             id: 'MebukiPlus_DropTime_Res',
+            title: 'レス数',
             textContent: '0',
           },
         ],
