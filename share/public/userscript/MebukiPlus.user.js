@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-05_21:50
+// @version      2025-11-05_22:20
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -62,8 +62,10 @@
       },
     },
     Onigiri: {
-      Reg: /(?<dice>おにぎり[\s\S]+?dice1d100=[\s\S]*?>(?<answer>\d+)\s\(\d+\)<[^>]+>)/giu,
-      Callback: (match, p1, p2) => `${p1} <span class="MebukiPlus_DiceHighlight">${p2 ** 2}</span>個`,
+      Reg: /(?<dice>おにぎり[\s\S]+?dice\d+d\d+=[\s\S]*?>(?<answer>(\d+\s)+)\(\d+\)<[^>]+>)/giu,
+      Callback: (match, p1, p2) => `${p1} ` + p2.trim().split(/\s+/)
+        .map(ans => `<span class="MebukiPlus_DiceHighlight">${ans ** 2}</span>個`)
+        .join(' '),
     },
   };
   const emojis = await getEmojis();
