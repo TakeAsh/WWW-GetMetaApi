@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-05_22:20
+// @version      2025-11-07_00:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -73,6 +73,18 @@
   const cssDiceHighlight = d.createElement('style');
   d.head.appendChild(cssDiceHighlight);
   setDiceHighlight(settings.DiceHighlight);
+  const cssPopupTitle = d.createElement('style');
+  cssPopupTitle.textContent = [
+    '@media (pointer: coarse) {',
+    '  .popupTitle[title] { position:relative; }',
+    '  .popupTitle[title]:hover::before {',
+    '    content:attr(title); position:fixed; top:0%; right:0%',
+    '    color:var(--foreground); background-color:var(--background);',
+    '    border:1px solid; z-index:10;',
+    '  }',
+    '}',
+  ].join('\n');
+  d.head.appendChild(cssPopupTitle);
   addStyle({
     '#MebukiPlus_Main': {
       marginBottom: 'auto',
@@ -186,9 +198,15 @@
   }
   function addPanel(header) {
     if (!header || header.querySelector('#MebukiPlus_Main')) { return; }
-    const divLast = header.querySelector(':scope > div:last-child');
-    if (divLast.children.length == 0) {
-      divLast.style.display = 'none';
+    const elmLast = header.querySelector(':scope > div:last-child');
+    if (elmLast.children.length == 0) {
+      elmLast.style.display = 'none';
+    }
+    const elmTitle = header.querySelector('.line-clamp-1');
+    if (elmTitle) {
+      const parent = elmTitle.parentNode;
+      parent.classList.add('popupTitle');
+      parent.title = elmTitle.textContent;
     }
     header.appendChild(prepareElement({
       tag: 'div',
@@ -451,37 +469,38 @@
     let elmDropTimeDst = header.querySelector('#MebukiPlus_DropTime');
     if (!elmDropTimeDst) {
       elmDropTimeDst = prepareElement({
-        tag: 'span',
+        tag: 'div',
         id: 'MebukiPlus_DropTime',
         children: [
           {
             tag: 'span',
             id: 'MebukiPlus_DropTime_Time',
             title: 'スレ落ち時刻',
+            classes: ['popupTitle'],
             textContent: '--/-- --:--',
           },
           {
-            tag: 'span',
-            textContent: ' ',
+            tag: 'br',
           },
           {
             tag: 'span',
             id: 'MebukiPlus_DropTime_Res',
             title: 'レス数',
+            classes: ['popupTitle'],
             textContent: '0',
           },
         ],
       });
-      header.querySelector('div[class*="md:justify-start"]').appendChild(elmDropTimeDst);
+      header.insertBefore(elmDropTimeDst, header.querySelector('div[class*="md:justify-start"]').nextElementSibling);
     }
     const elmDropTimeTime = elmDropTimeDst.querySelector('#MebukiPlus_DropTime_Time');
     const m = /\((?<mon>\d+)月(?<day>\d+)日\s(?<hour>\d+):(?<min>\d+)\)/u.exec(elmDropTimeSrc.textContent);
     if (m) {
       const now = new Date();
       const timeDrop = new Date(`${now.getFullYear() + (now.getMonth() > parseInt(m.groups.mon) ? 1 : 0)}-${m.groups.mon}-${m.groups.day} ${m.groups.hour}:${m.groups.min}`);
-      const strDrop = timeDrop.toLocaleString('ja-jp', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', });
-      if (elmDropTimeTime.textContent != strDrop) {
-        elmDropTimeTime.textContent = strDrop;
+      const strDrop = timeDrop.toLocaleString('ja-jp', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', }).replace(/\s/, '<br>');
+      if (elmDropTimeTime.innerHTML != strDrop) {
+        elmDropTimeTime.innerHTML = strDrop;
       }
       if (!elmDropTimeTime.classList.contains('MebukiPlus_Highlight') && timeDrop - now < 30 * 60 * 1000) {
         elmDropTimeTime.classList.add('MebukiPlus_Highlight');
