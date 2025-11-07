@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-07_00:00
+// @version      2025-11-07_21:30
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -197,9 +197,9 @@
     }
   }
   function addPanel(header) {
-    if (!header || header.querySelector('#MebukiPlus_Main')) { return; }
+    if (!header) { return; }
     const elmLast = header.querySelector(':scope > div:last-child');
-    if (elmLast.children.length == 0) {
+    if (elmLast && elmLast.children.length == 0) {
       elmLast.style.display = 'none';
     }
     const elmTitle = header.querySelector('.line-clamp-1');
@@ -208,6 +208,7 @@
       parent.classList.add('popupTitle');
       parent.title = elmTitle.textContent;
     }
+    if (header.querySelector('#MebukiPlus_Main')) { return; }
     header.appendChild(prepareElement({
       tag: 'div',
       id: 'MebukiPlus_Main',
