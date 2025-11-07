@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mebuki Plus
 // @namespace    https://TakeAsh.net/
-// @version      2025-11-07_21:30
+// @version      2025-11-07_22:00
 // @description  enhance Mebuki channel
 // @author       TakeAsh
 // @match        https://mebuki.moe/app
@@ -539,7 +539,7 @@
       .forEach(elm => {
         elm.dataset.checkZorome = 1;
         const after = elm.innerHTML.replace(
-          /(\.\d*?)((\d)\3+)$/,
+          /([0-9\:\.]*?)((\d)(\3|\:|\.)+)$/,
           '$1<span class="MebukiPlus_Highlight">$2</span>'
         );
         if (elm.innerHTML != after) {
